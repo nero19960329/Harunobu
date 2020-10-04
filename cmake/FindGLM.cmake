@@ -17,7 +17,6 @@
 # Additional modules
 include(FindPackageHandleStandardArgs)
 
-message(WARNING ${GLM_ROOT_DIR})
 if (WIN32)
 	# Find include files
 	find_path(
