@@ -12,7 +12,7 @@ public:
     int height, width;
 
 public:
-    Camera() {}
+    Camera();
 
     void log_current_status() const;
 }; // class Camera
