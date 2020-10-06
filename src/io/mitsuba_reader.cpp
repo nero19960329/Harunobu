@@ -9,17 +9,26 @@
 
 namespace harunobu {
 
-#define CHECK_ATTR(node, attr_name)                                            \
-    HARUNOBU_CHECK(node->first_attribute(attr_name) != nullptr,                \
-                   "'{}' node does not have attribute '{}'!", node->name(),    \
-                   attr_name);
+//============================== Utils ==============================
 
-#define CHECK_ATTR_VALUE(node, attr_name, attr_value)                          \
-    CHECK_ATTR(node, attr_name);                                               \
-    HARUNOBU_CHECK(                                                            \
-        str_equal(node->first_attribute(attr_name)->value(), attr_value),      \
-        "'{}' is not supported for attribute '{}' at '{}' node!",              \
+inline bool str_equal(const char *a, const char *b) {
+    return strcmp(a, b) == 0;
+}
+
+inline void check_attr(rapidxml::xml_node<> *node, const char *attr_name) {
+    HARUNOBU_CHECK(node->first_attribute(attr_name) != nullptr,
+                   "'{}' node does not have attribute '{}'!", node->name(),
+                   attr_name);
+}
+
+inline void check_attr_value(rapidxml::xml_node<> *node, const char *attr_name,
+                             const char *attr_value) {
+    check_attr(node, attr_name);
+    HARUNOBU_CHECK(
+        str_equal(node->first_attribute(attr_name)->value(), attr_value),
+        "'{}' is not supported for attribute '{}' at '{}' node!",
         node->first_attribute(attr_name)->value(), attr_name, node->name());
+}
 
 inline void ignore_attr(rapidxml::xml_node<> *node, const char *attr_name) {
     HARUNOBU_WARN("Attribute '{}' is not supported at '{}' node, ignored.",
@@ -40,10 +49,6 @@ inline void check_any_subnode(rapidxml::xml_node<> *node,
     HARUNOBU_CHECK(has_any_subnode,
                    "'{}' node does not have any of subnode '{}'!", node->name(),
                    subnode_names_str);
-}
-
-inline bool str_equal(const char *a, const char *b) {
-    return strcmp(a, b) == 0;
 }
 
 inline mat4 load_mat4(rapidxml::xml_attribute<> *mat_attr) {
@@ -67,6 +72,8 @@ inline vec3 load_vec3(rapidxml::xml_attribute<> *vec_attr) {
     return vec;
 }
 
+//============================ Class functions ============================
+
 sptr<Scene> MitsubaReader::load(std::string scene_file) {
     rapidxml::file<> scene_xml(scene_file.c_str());
     rapidxml::xml_document<> doc;
@@ -82,7 +89,7 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
     HARUNOBU_DEBUG("Loading camera ...");
 
     HARUNOBU_CHECK(camera_node != nullptr, "There is no camera node!");
-    CHECK_ATTR_VALUE(camera_node, "type", "perspective");
+    check_attr_value(camera_node, "type", "perspective");
 
     sptr<Camera> camera = std::make_shared<Camera>();
 
@@ -100,14 +107,14 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
 
     // Load transform
     auto trans_node = camera_node->first_node("transform");
-    CHECK_ATTR_VALUE(trans_node, "name", "toWorld");
+    check_attr_value(trans_node, "name", "toWorld");
     check_any_subnode(trans_node, {"matrix", "lookat"});
     auto trans_mat_node = trans_node->first_node("matrix");
     auto trans_lookat_node = trans_node->first_node("lookat");
     if (trans_mat_node != nullptr) {
         HARUNOBU_DEBUG("Traversing node {}-{}", trans_node->name(),
                        trans_mat_node->name());
-        CHECK_ATTR(trans_mat_node, "value");
+        check_attr(trans_mat_node, "value");
         auto trans_mat = load_mat4(trans_mat_node->first_attribute("value"));
         camera->pos = homo2carte(vec4(0.0, 0.0, 0.0, 1.0) * trans_mat);
         auto target = homo2carte(vec4(0.0, 0.0, 1.0, 1.0) * trans_mat);
@@ -125,7 +132,7 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
 
     // Load film
     auto film_node = camera_node->first_node("film");
-    CHECK_ATTR_VALUE(film_node, "type", "ldrfilm");
+    check_attr_value(film_node, "type", "ldrfilm");
     for (auto node = film_node->first_node("integer"); node != nullptr;
          node = node->next_sibling("integer")) {
         auto node_name = node->first_attribute("name")->value();
