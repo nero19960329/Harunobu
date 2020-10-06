@@ -1,5 +1,6 @@
 #include <harunobu/core/utils.h>
 #include <harunobu/io/mitsuba_reader.h>
+#include <harunobu/material/bsdf.h>
 
 #include <rapidxml/rapidxml_utils.hpp>
 
@@ -35,6 +36,11 @@ inline void ignore_attr(rapidxml::xml_node<> *node, const char *attr_name) {
                   attr_name, node->name());
 }
 
+inline void ignore_subnode(rapidxml::xml_node<> *node, const char *subnode_name) {
+    HARUNOBU_WARN("Subnode '{}' is not supported under '{}' node, ignored.",
+                  subnode_name, node->name());
+}
+
 inline void check_any_subnode(rapidxml::xml_node<> *node,
                               std::vector<const char *> subnode_names) {
     bool has_any_subnode = false;
@@ -63,11 +69,25 @@ inline mat4 load_mat4(rapidxml::xml_attribute<> *mat_attr) {
 }
 
 inline vec3 load_vec3(rapidxml::xml_attribute<> *vec_attr) {
+    // xxx xxx xxx
     std::string vec_str = vec_attr->value();
     vec3 vec;
     std::istringstream iss(vec_str);
     for (int i = 0; i < 3; ++i) {
         iss >> vec[i];
+    }
+    return vec;
+}
+
+inline vec3 load_rgb(rapidxml::xml_attribute<> *rgb_attr) {
+    // xxx, xxx, xxx
+    std::string rgb_str = rgb_attr->value();
+    vec3 vec;
+    std::istringstream iss(rgb_str);
+    for (int i = 0; i < 3; ++i) {
+        iss >> vec[i];
+        char tmp;
+        iss >> tmp;
     }
     return vec;
 }
@@ -80,7 +100,9 @@ sptr<Scene> MitsubaReader::load(std::string scene_file) {
     doc.parse<0>(scene_xml.data());
     auto scene_node = doc.first_node("scene");
     HARUNOBU_CHECK(scene_node != nullptr, "There is no scene node!");
+    check_any_subnode(scene_node, { "sensor" });
     auto camera = load_camera(scene_node->first_node("sensor"));
+    auto materials = load_materials(scene_node);
 
     return std::make_shared<Scene>();
 }
@@ -148,6 +170,33 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
 
     camera->log_current_status();
     return camera;
+}
+
+std::vector<sptr<MaterialBase>> MitsubaReader::load_materials(rapidxml::xml_node<> *scene_node) {
+    ignore_subnode(scene_node, "brdf");
+    ignore_subnode(scene_node, "bssrdf");
+
+    std::vector<sptr<MaterialBase>> materials;
+    for (auto node = scene_node->first_node("bsdf"); node != nullptr; node = node->next_sibling("bsdf")) {
+        check_attr_value(node, "type", "twosided");
+        check_attr(node, "id");
+        check_any_subnode(node, { "bsdf" });
+        auto id = node->first_attribute("id")->value();
+
+        auto bsdf_node = node->first_node("bsdf");
+        check_attr_value(bsdf_node, "type", "diffuse");
+        check_any_subnode(bsdf_node, { "rgb" });
+
+        auto rgb_node = bsdf_node->first_node("rgb");
+        sptr<MaterialBase> material = std::make_shared<BSDF>();
+        if (rgb_node != nullptr) {
+            check_attr_value(rgb_node, "name", "reflectance");
+            material->rgb = load_rgb(rgb_node->first_attribute("value"));
+        }
+        materials.push_back(material);
+    }
+
+    return materials;
 }
 
 } // namespace harunobu
