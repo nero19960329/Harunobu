@@ -12,7 +12,7 @@ public:
     std::array<vec3, 3> normals;
 
 public:
-    Tri(const PrimitiveBase* parent_prim_);
+    Tri(const PrimitiveBase *parent_prim_);
 
     virtual vec3 get_normal(const vec3 &p) const;
 

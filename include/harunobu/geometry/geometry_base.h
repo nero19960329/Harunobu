@@ -8,10 +8,10 @@ class PrimitiveBase;
 
 class GeometryBase {
 public:
-    const PrimitiveBase* parent_prim;
+    const PrimitiveBase *parent_prim;
 
 public:
-    GeometryBase(const PrimitiveBase* parent_prim_)
+    GeometryBase(const PrimitiveBase *parent_prim_)
         : parent_prim(parent_prim_) {}
 
     // maybe input argument's type should be sth like IntersectInfo?
