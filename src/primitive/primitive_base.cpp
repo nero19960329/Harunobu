@@ -1,18 +1,21 @@
-#include <unordered_map>
-
 #include <harunobu/primitive/primitive_base.h>
 #include <harunobu/primitive/rect.h>
 
 namespace harunobu {
 
-PrimitiveBase::PrimitiveBase(sptr<MaterialBase> material_,
-                             const mat4 &trans_mat)
-    : material(material_) {
-    make_geos(trans_mat);
-}
+PrimitiveBase::PrimitiveBase(sptr<MaterialBase> material_)
+    : material(material_) {}
 
-/*sptr<PrimitiveBase> PrimitiveBase::factory(std::string name) {
-    std::unordered_map<std::string, sptr<PrimitiveBase>> fact;
-}*/
+sptr<PrimitiveBase> PrimitiveBase::factory(std::string name,
+                                           sptr<MaterialBase> material,
+                                           const mat4 &trans_mat) {
+    if (name == "rectangle") {
+        auto prim = std::make_shared<Rect>(material);
+        prim->make_geos(trans_mat);
+        return prim;
+    } else {
+        HARUNOBU_CHECK(false, "Unsupported shape '{}'!", name)
+    }
+}
 
 } // namespace harunobu

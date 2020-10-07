@@ -15,12 +15,15 @@ public:
     std::vector<sptr<GeometryBase>> geos;
 
 public:
-    PrimitiveBase(sptr<MaterialBase> material_, const mat4 &trans_mat);
+    PrimitiveBase(sptr<MaterialBase> material_);
 
-    // static sptr<PrimitiveBase> factory(std::string name);
+    virtual void log_current_status() const = 0;
 
-private:
-    virtual void make_geos(const mat4 &trans_mat) {}
+    static sptr<PrimitiveBase> factory(std::string name,
+                                       sptr<MaterialBase> material,
+                                       const mat4 &trans_mat);
+
+    virtual void make_geos(const mat4 &trans_mat) = 0;
 }; // class PrimitiveBase
 
 } // namespace harunobu

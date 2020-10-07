@@ -212,6 +212,8 @@ MitsubaReader::load_materials(rapidxml::xml_node<> *scene_node) {
 
 sptr<ObjectsBase>
 MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
+    sptr<ObjectsBase> objects = std::make_shared<ObjectsBase>();
+
     for (auto node = scene_node->first_node("shape"); node != nullptr;
          node = node->next_sibling("shape")) {
         CHECK_ANY_SUBNODE(node, {"transform"});
@@ -232,9 +234,15 @@ MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
         HARUNOBU_CHECK(materials.find(ref_mate_id) != materials.end(),
                        "Material '{}' is not mentioned before!", ref_mate_id);
         auto material = materials[ref_mate_id];
+
+        std::string prim_name = node->first_attribute("type")->value();
+        auto prim = PrimitiveBase::factory(prim_name, material, trans_mat);
+        prim->log_current_status();
+        objects->add_primitive(prim);
     }
 
-    return std::make_shared<ObjectsBase>();
+    HARUNOBU_CHECK(objects->build(), "Objects not partitioned successfully!");
+    return objects;
 }
 
 } // namespace harunobu

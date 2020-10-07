@@ -16,6 +16,7 @@ find_package(spdlog REQUIRED)
 file(GLOB HARUNOBU_SRC
   "src/core/*.cpp"
   "src/io/*.cpp"
+  "src/material/*.cpp"
   "src/geometry/*.cpp"
   "src/objects/*.cpp"
   "src/primitive/*.cpp"

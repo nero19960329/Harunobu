@@ -18,6 +18,8 @@ public:
     virtual vec3 get_normal(const vec3 &p) const = 0;
 
     virtual void do_transform(const mat4 &trans_mat) = 0;
+
+    virtual void log_current_status() const = 0;
 }; // class GeomertyBase
 
 } // namespace harunobu

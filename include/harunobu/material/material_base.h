@@ -11,6 +11,8 @@ public:
 
 public:
     MaterialBase() : rgb(0.0, 0.0, 0.0) {}
+
+    virtual void log_current_status() const;
 }; // class MaterialBase
 
 } // namespace harunobu
