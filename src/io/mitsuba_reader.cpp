@@ -140,11 +140,11 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
                        trans_mat_node->name());
         CHECK_ATTR(trans_mat_node, "value");
         auto trans_mat = load_mat4(trans_mat_node->first_attribute("value"));
-        pos = homo2carte(vec4(0.0, 0.0, 0.0, 1.0) * trans_mat);
-        auto target = homo2carte(vec4(0.0, 0.0, 1.0, 1.0) * trans_mat);
+        pos = homo2carte(vec4(0, 0, 0, 1) * trans_mat);
+        auto target = homo2carte(vec4(0, 0, 1, 1) * trans_mat);
         dir = glm::normalize(target - pos);
         // direction does not need to be converted
-        up = vec3(vec4(0.0, 1.0, 0.0, 0.0) * trans_mat);
+        up = vec3(vec4(0, 1, 0, 0) * trans_mat);
     } else if (trans_lookat_node != nullptr) {
         HARUNOBU_DEBUG("Traversing node {}-{}", trans_node->name(),
                        trans_lookat_node->name());

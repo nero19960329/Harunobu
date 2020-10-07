@@ -10,7 +10,7 @@ public:
     vec3 rgb;
 
 public:
-    MaterialBase() : rgb(0.0, 0.0, 0.0) {}
+    MaterialBase() : rgb(0, 0, 0) {}
 
     virtual void log_current_status() const;
 }; // class MaterialBase

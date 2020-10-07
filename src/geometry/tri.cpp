@@ -15,10 +15,10 @@ vec3 Tri::get_normal(const vec3 &p) const {
 
 void Tri::do_transform(const mat4 &trans_mat) {
     for (auto &v : vertices) {
-        v = homo2carte(vec4(v, 1.0) * trans_mat);
+        v = homo2carte(vec4(v, 1) * trans_mat);
     }
     for (auto &n : normals) {
-        n = vec4(n, 0.0) * trans_mat;
+        n = vec4(n, 0) * trans_mat;
         n = glm::normalize(n);
     }
 }
