@@ -18,8 +18,8 @@ find_package_handle_standard_args(spdlog DEFAULT_MSG SPDLOG_INCLUDE_DIR)
 
 if(SPDLOG_FOUND)
     # provide import target:
-	 add_library(spdlog::spdlog INTERFACE IMPORTED)
-	 set_target_properties(spdlog::spdlog PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${SPDLOG_INCLUDE_DIR})
+	add_library(spdlog::spdlog INTERFACE IMPORTED)
+	set_target_properties(spdlog::spdlog PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${SPDLOG_INCLUDE_DIR})
 endif()
 
 mark_as_advanced(SPDLOG_INCLUDE_DIR)

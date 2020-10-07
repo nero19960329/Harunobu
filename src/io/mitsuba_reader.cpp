@@ -1,4 +1,5 @@
 #include <harunobu/core/utils.h>
+#include <harunobu/integrator/path_tracer.h>
 #include <harunobu/io/mitsuba_reader.h>
 #include <harunobu/material/bsdf.h>
 
@@ -97,20 +98,60 @@ sptr<Scene> MitsubaReader::load(std::string scene_file) {
     rapidxml::file<> scene_xml(scene_file.c_str());
     rapidxml::xml_document<> doc;
     doc.parse<0>(scene_xml.data());
+
+    sptr<Scene> scene = std::make_shared<Scene>();
+
     auto scene_node = doc.first_node("scene");
     HARUNOBU_CHECK(scene_node != nullptr, "There is no scene node!");
     CHECK_ANY_SUBNODE(scene_node, {"sensor"});
+    CHECK_ANY_SUBNODE(scene_node, {"integrator"});
+    auto integrator =
+        load_integrator(scene_node->first_node("integrator"), scene);
     auto camera = load_camera(scene_node->first_node("sensor"));
     materials = load_materials(scene_node);
     auto objects = load_objects(scene_node);
 
-    return std::make_shared<Scene>();
+    scene->integrator = integrator;
+    scene->camera = camera;
+    scene->objects = objects;
+
+    return scene;
+}
+
+sptr<IntegratorBase>
+MitsubaReader::load_integrator(rapidxml::xml_node<> *integrator_node,
+                               sptr<Scene> scene) {
+    HARUNOBU_DEBUG("Loading integrator ...");
+    CHECK_ATTR_VALUE(integrator_node, "type", "path");
+
+    int max_depth;
+
+    // Load integer
+    for (auto node = integrator_node->first_node("integer"); node != nullptr;
+         node = node->next_sibling("integer")) {
+        auto node_name = node->first_attribute("name")->value();
+        HARUNOBU_DEBUG("Traversing node {}-{}", node->name(), node_name);
+        if (str_equal(node_name, "maxDepth")) {
+            max_depth = atoi(node->first_attribute("value")->value());
+        } else {
+            IGNORE_ATTR(integrator_node, node_name);
+        }
+    }
+
+    std::string integrator_type =
+        integrator_node->first_attribute("type")->value();
+    sptr<IntegratorBase> integrator;
+    if (integrator_type == "path") {
+        integrator = std::make_shared<PathTracer>(scene, max_depth);
+    } else {
+        HARUNOBU_CHECK(false, "Unsupported integrator type '{}'!",
+                       integrator_type);
+    }
+    return integrator;
 }
 
 sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
     HARUNOBU_DEBUG("Loading camera ...");
-
-    HARUNOBU_CHECK(camera_node != nullptr, "There is no camera node!");
     CHECK_ATTR_VALUE(camera_node, "type", "perspective");
 
     vec3 pos, dir, up;
@@ -178,6 +219,8 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
 
 std::unordered_map<std::string, sptr<MaterialBase>>
 MitsubaReader::load_materials(rapidxml::xml_node<> *scene_node) {
+    HARUNOBU_DEBUG("Loading materials ...");
+
     auto ignore_node_names = {"brdf", "bssrdf"};
     for (const auto &name : ignore_node_names) {
         if (scene_node->first_node(name) != nullptr) {
@@ -212,6 +255,8 @@ MitsubaReader::load_materials(rapidxml::xml_node<> *scene_node) {
 
 sptr<ObjectsBase>
 MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
+    HARUNOBU_DEBUG("Loading objects ...");
+
     sptr<ObjectsBase> objects = std::make_shared<ObjectsBase>();
 
     for (auto node = scene_node->first_node("shape"); node != nullptr;
