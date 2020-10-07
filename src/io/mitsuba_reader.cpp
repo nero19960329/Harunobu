@@ -12,49 +12,56 @@ namespace harunobu {
 
 //============================== Utils ==============================
 
+#define CHECK_ATTR(node, attr_name)                                            \
+    HARUNOBU_CHECK(node->first_attribute(attr_name) != nullptr,                \
+                   "'{}' node does not have attribute '{}'!", node->name(),    \
+                   attr_name);
+
+#define CHECK_ATTR_VALUE(node, attr_name, attr_value)                          \
+    CHECK_ATTR(node, attr_name);                                               \
+    HARUNOBU_CHECK(                                                            \
+        str_equal(node->first_attribute(attr_name)->value(), attr_value),      \
+        "'{}' is not supported for attribute '{}' at '{}' node!",              \
+        node->first_attribute(attr_name)->value(), attr_name, node->name());
+
+#define IGNORE_ATTR(node, attr_name)                                           \
+    HARUNOBU_WARN("Attribute '{}' is not supported at '{}' node, ignored.",    \
+                  attr_name, node->name());
+
+#define IGNORE_SUBNODE(node, subnode_name)                                     \
+    HARUNOBU_WARN("Subnode '{}' is not supported under '{}' node, ignored.",   \
+                  subnode_name, node->name());
+
+#define CHECK_ANY_SUBNODE(node, ...)                                           \
+    {                                                                          \
+        std::vector<const char *> subnode_names(__VA_ARGS__);                  \
+        HARUNOBU_CHECK(has_any_subnode(node, subnode_names),                   \
+                       "'{}' node does not have any of subnode '{}'!",         \
+                       node->name(), concat_str(subnode_names));               \
+    }
+
 inline bool str_equal(const char *a, const char *b) {
     return strcmp(a, b) == 0;
 }
 
-inline void check_attr(rapidxml::xml_node<> *node, const char *attr_name) {
-    HARUNOBU_CHECK(node->first_attribute(attr_name) != nullptr,
-                   "'{}' node does not have attribute '{}'!", node->name(),
-                   attr_name);
-}
-
-inline void check_attr_value(rapidxml::xml_node<> *node, const char *attr_name,
-                             const char *attr_value) {
-    check_attr(node, attr_name);
-    HARUNOBU_CHECK(
-        str_equal(node->first_attribute(attr_name)->value(), attr_value),
-        "'{}' is not supported for attribute '{}' at '{}' node!",
-        node->first_attribute(attr_name)->value(), attr_name, node->name());
-}
-
-inline void ignore_attr(rapidxml::xml_node<> *node, const char *attr_name) {
-    HARUNOBU_WARN("Attribute '{}' is not supported at '{}' node, ignored.",
-                  attr_name, node->name());
-}
-
-inline void ignore_subnode(rapidxml::xml_node<> *node, const char *subnode_name) {
-    HARUNOBU_WARN("Subnode '{}' is not supported under '{}' node, ignored.",
-                  subnode_name, node->name());
-}
-
-inline void check_any_subnode(rapidxml::xml_node<> *node,
-                              std::vector<const char *> subnode_names) {
-    bool has_any_subnode = false;
-    std::string subnode_names_str = "[ ";
+inline bool has_any_subnode(rapidxml::xml_node<> *node,
+                            const std::vector<const char *> &subnode_names) {
     for (const auto &subnode_name : subnode_names) {
-        has_any_subnode |= (node->first_node(subnode_name) != nullptr);
-        subnode_names_str += subnode_name;
+        if (node->first_node(subnode_name) != nullptr) {
+            return true;
+        }
+    }
+    return false;
+}
+
+inline std::string concat_str(const std::vector<const char *> &strs) {
+    std::string subnode_names_str = "[ ";
+    for (const auto &s : strs) {
+        subnode_names_str += s;
         subnode_names_str += " ";
     }
     subnode_names_str += "]";
-
-    HARUNOBU_CHECK(has_any_subnode,
-                   "'{}' node does not have any of subnode '{}'!", node->name(),
-                   subnode_names_str);
+    return subnode_names_str;
 }
 
 inline mat4 load_mat4(rapidxml::xml_attribute<> *mat_attr) {
@@ -100,7 +107,7 @@ sptr<Scene> MitsubaReader::load(std::string scene_file) {
     doc.parse<0>(scene_xml.data());
     auto scene_node = doc.first_node("scene");
     HARUNOBU_CHECK(scene_node != nullptr, "There is no scene node!");
-    check_any_subnode(scene_node, { "sensor" });
+    CHECK_ANY_SUBNODE(scene_node, {"sensor"});
     auto camera = load_camera(scene_node->first_node("sensor"));
     auto materials = load_materials(scene_node);
 
@@ -111,7 +118,7 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
     HARUNOBU_DEBUG("Loading camera ...");
 
     HARUNOBU_CHECK(camera_node != nullptr, "There is no camera node!");
-    check_attr_value(camera_node, "type", "perspective");
+    CHECK_ATTR_VALUE(camera_node, "type", "perspective");
 
     sptr<Camera> camera = std::make_shared<Camera>();
 
@@ -123,20 +130,20 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
         if (str_equal(node_name, "fov")) {
             camera->fov = atof(node->first_attribute("value")->value());
         } else {
-            ignore_attr(camera_node, node_name);
+            IGNORE_ATTR(camera_node, node_name);
         }
     }
 
     // Load transform
     auto trans_node = camera_node->first_node("transform");
-    check_attr_value(trans_node, "name", "toWorld");
-    check_any_subnode(trans_node, {"matrix", "lookat"});
+    CHECK_ATTR_VALUE(trans_node, "name", "toWorld");
+    CHECK_ANY_SUBNODE(trans_node, {"matrix", "lookat"});
     auto trans_mat_node = trans_node->first_node("matrix");
     auto trans_lookat_node = trans_node->first_node("lookat");
     if (trans_mat_node != nullptr) {
         HARUNOBU_DEBUG("Traversing node {}-{}", trans_node->name(),
                        trans_mat_node->name());
-        check_attr(trans_mat_node, "value");
+        CHECK_ATTR(trans_mat_node, "value");
         auto trans_mat = load_mat4(trans_mat_node->first_attribute("value"));
         camera->pos = homo2carte(vec4(0.0, 0.0, 0.0, 1.0) * trans_mat);
         auto target = homo2carte(vec4(0.0, 0.0, 1.0, 1.0) * trans_mat);
@@ -154,7 +161,7 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
 
     // Load film
     auto film_node = camera_node->first_node("film");
-    check_attr_value(film_node, "type", "ldrfilm");
+    CHECK_ATTR_VALUE(film_node, "type", "ldrfilm");
     for (auto node = film_node->first_node("integer"); node != nullptr;
          node = node->next_sibling("integer")) {
         auto node_name = node->first_attribute("name")->value();
@@ -164,7 +171,7 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
         } else if (str_equal(node_name, "height")) {
             camera->height = atoi(node->first_attribute("value")->value());
         } else {
-            ignore_attr(camera_node, node_name);
+            IGNORE_ATTR(camera_node, node_name);
         }
     }
 
@@ -172,25 +179,27 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
     return camera;
 }
 
-std::vector<sptr<MaterialBase>> MitsubaReader::load_materials(rapidxml::xml_node<> *scene_node) {
-    ignore_subnode(scene_node, "brdf");
-    ignore_subnode(scene_node, "bssrdf");
+std::vector<sptr<MaterialBase>>
+MitsubaReader::load_materials(rapidxml::xml_node<> *scene_node) {
+    IGNORE_SUBNODE(scene_node, "brdf");
+    IGNORE_SUBNODE(scene_node, "bssrdf");
 
     std::vector<sptr<MaterialBase>> materials;
-    for (auto node = scene_node->first_node("bsdf"); node != nullptr; node = node->next_sibling("bsdf")) {
-        check_attr_value(node, "type", "twosided");
-        check_attr(node, "id");
-        check_any_subnode(node, { "bsdf" });
+    for (auto node = scene_node->first_node("bsdf"); node != nullptr;
+         node = node->next_sibling("bsdf")) {
+        CHECK_ATTR_VALUE(node, "type", "twosided");
+        CHECK_ATTR(node, "id");
+        CHECK_ANY_SUBNODE(node, {"bsdf"});
         auto id = node->first_attribute("id")->value();
 
         auto bsdf_node = node->first_node("bsdf");
-        check_attr_value(bsdf_node, "type", "diffuse");
-        check_any_subnode(bsdf_node, { "rgb" });
+        CHECK_ATTR_VALUE(bsdf_node, "type", "diffuse");
+        CHECK_ANY_SUBNODE(bsdf_node, {"rgb"});
 
         auto rgb_node = bsdf_node->first_node("rgb");
         sptr<MaterialBase> material = std::make_shared<BSDF>();
         if (rgb_node != nullptr) {
-            check_attr_value(rgb_node, "name", "reflectance");
+            CHECK_ATTR_VALUE(rgb_node, "name", "reflectance");
             material->rgb = load_rgb(rgb_node->first_attribute("value"));
         }
         materials.push_back(material);
