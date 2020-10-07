@@ -2,9 +2,10 @@
 
 namespace harunobu {
 
-Camera::Camera()
-    : pos(0.0, 0.0, 0.0), dir(0.0, 0.0, 1.0), up(0.0, 1.0, 0.0), fov(30),
-      height(1920), width(1080) {}
+Camera::Camera(const vec3 &pos_, const vec3 &dir_, const vec3 &up_, real fov_,
+               int height_, int width_)
+    : pos(pos_), dir(dir_), up(up_), fov(fov_), height(height_), width(width_) {
+}
 
 void Camera::log_current_status() const {
     HARUNOBU_INFO("Camera");

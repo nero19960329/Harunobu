@@ -2,8 +2,6 @@
 
 namespace harunobu {
 
-class IntegratorBase {
-
-}; // class IntegratorBase
+class IntegratorBase {}; // class IntegratorBase
 
 } // namespace harunobu

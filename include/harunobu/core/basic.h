@@ -10,8 +10,7 @@ public:
     vec3 dir;
 
 public:
-    explicit Ray(const vec3& pos_, const vec3& dir_):
-        pos(pos_), dir(dir_) {}
+    explicit Ray(const vec3 &pos_, const vec3 &dir_) : pos(pos_), dir(dir_) {}
 };
 
 } // namespace harunobu

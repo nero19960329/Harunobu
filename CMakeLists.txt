@@ -13,44 +13,33 @@ find_package(GLM REQUIRED)
 find_package(RapidXML REQUIRED)
 find_package(spdlog REQUIRED)
 
-file(GLOB HARUNOBU_CORE_SRC
+file(GLOB HARUNOBU_SRC
   "src/core/*.cpp"
-)
-add_library(harunobu_core SHARED
-  ${HARUNOBU_CORE_SRC}
-)
-target_include_directories(harunobu_core
-  PUBLIC
-    ${GLM_INCLUDE_DIRS}
-    ${PROJECT_SOURCE_DIR}/include
-)
-
-file(GLOB HARUNOBU_IO_SRC
   "src/io/*.cpp"
+  "src/geometry/*.cpp"
+  "src/objects/*.cpp"
+  "src/primitive/*.cpp"
 )
-add_library(harunobu_io SHARED
-  ${HARUNOBU_IO_SRC}
-)
-target_include_directories(harunobu_io
+add_library(harunobu SHARED
+  ${HARUNOBU_SRC})
+target_include_directories(harunobu
   PUBLIC
     ${GLM_INCLUDE_DIRS}
     ${RapidXML_INCLUDE_DIR}
-    ${PROJECT_SOURCE_DIR}/include
-)
-target_link_libraries(harunobu_io
-  PUBLIC
-    harunobu_core)
+    ${SPDLOG_INCLUDE_DIR}
+    ${PROJECT_SOURCE_DIR}/include)
 
-add_executable(harunobu
+add_executable(harunobu_bin
   src/main.cpp
 )
-target_include_directories(harunobu
+target_include_directories(harunobu_bin
   PRIVATE
     ${PROJECT_SOURCE_DIR}/include
 )
-target_link_libraries(harunobu
+target_link_libraries(harunobu_bin
   PRIVATE
-    harunobu_core
-    harunobu_io
+    harunobu
     spdlog::spdlog
 )
+set_target_properties(harunobu_bin
+  PROPERTIES OUTPUT_NAME harunobu)

@@ -6,6 +6,7 @@ namespace harunobu {
 
 class MaterialBase {
 public:
+    std::string name;
     vec3 rgb;
 
 public:

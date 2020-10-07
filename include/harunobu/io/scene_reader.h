@@ -12,4 +12,4 @@ public:
     virtual sptr<Scene> load(std::string scene_file) = 0;
 };
 
-} // namespace harunobus
+} // namespace harunobu
