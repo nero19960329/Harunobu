@@ -9,7 +9,7 @@
 #include <sstream>
 #include <vector>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 //============================== Utils ==============================
 
@@ -290,4 +290,4 @@ MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
     return objects;
 }
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

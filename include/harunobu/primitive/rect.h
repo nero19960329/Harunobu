@@ -2,7 +2,7 @@
 
 #include <harunobu/primitive/primitive_base.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class Rect : public PrimitiveBase {
 public:
@@ -12,4 +12,4 @@ public:
     virtual void log_current_status() const override;
 }; // class Rect
 
-}; // namespace harunobu
+}; // HARUNOBU_NAMESPACE_BEGIN

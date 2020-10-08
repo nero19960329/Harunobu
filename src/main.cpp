@@ -14,8 +14,7 @@ int main(int argc, char *argv[]) {
 
     harunobu::MitsubaReader scene_reader;
     auto scene = scene_reader.load(std::string(argv[1]));
-    auto image = scene->render();
-
-    cv::imwrite("./scene.png", image);
+    scene->render();
+    
     return 0;
 }

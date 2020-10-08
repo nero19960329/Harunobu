@@ -2,7 +2,7 @@
 
 #include <harunobu/core/common.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class MaterialBase {
 public:
@@ -15,4 +15,4 @@ public:
     virtual void log_current_status() const;
 }; // class MaterialBase
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

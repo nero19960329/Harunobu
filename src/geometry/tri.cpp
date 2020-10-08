@@ -1,7 +1,7 @@
 #include <harunobu/core/utils.h>
 #include <harunobu/geometry/tri.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 Tri::Tri(const PrimitiveBase *parent_prim_,
          const std::array<vec3, 3> &vertices_,
@@ -31,4 +31,4 @@ void Tri::log_current_status() const {
                   glm::to_string(normals[1]), glm::to_string(normals[2]));
 }
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

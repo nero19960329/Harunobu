@@ -3,7 +3,7 @@
 #include <harunobu/core/common.h>
 #include <harunobu/primitive/primitive_base.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class ObjectsBase {
 public:
@@ -16,4 +16,4 @@ private:
     std::vector<sptr<GeometryBase>> geos;
 }; // class ObjectsBase
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

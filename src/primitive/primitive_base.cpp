@@ -2,7 +2,7 @@
 #include <harunobu/primitive/primitive_base.h>
 #include <harunobu/primitive/rect.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 PrimitiveBase::PrimitiveBase(sptr<MaterialBase> material_)
     : material(material_) {}
@@ -23,4 +23,4 @@ sptr<PrimitiveBase> PrimitiveBase::factory(std::string name,
     }
 }
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

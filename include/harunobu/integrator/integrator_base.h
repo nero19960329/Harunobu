@@ -4,7 +4,7 @@
 
 #include <opencv2/opencv.hpp>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class Scene;
 
@@ -19,4 +19,4 @@ public:
     virtual cv::Mat integrate() = 0;
 }; // class IntegratorBase
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

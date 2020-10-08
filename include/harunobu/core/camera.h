@@ -3,7 +3,7 @@
 #include <harunobu/core/basic.h>
 #include <harunobu/core/common.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class Camera {
 public:
@@ -21,4 +21,4 @@ public:
     void log_current_status() const;
 }; // class Camera
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

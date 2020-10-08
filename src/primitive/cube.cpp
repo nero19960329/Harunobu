@@ -1,6 +1,6 @@
 #include <harunobu/primitive/cube.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 std::pair<sptr<Tri>, sptr<Tri>>
 Cube::make_rect_geos(const mat4 &trans_mat, const std::array<vec3, 4> &vertices,
@@ -63,4 +63,4 @@ void Cube::log_current_status() const {
     }
 }
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

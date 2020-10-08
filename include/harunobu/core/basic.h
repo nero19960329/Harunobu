@@ -2,7 +2,7 @@
 
 #include <harunobu/core/common.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class Ray {
 public:
@@ -13,4 +13,4 @@ public:
     explicit Ray(const vec3 &pos_, const vec3 &dir_) : pos(pos_), dir(dir_) {}
 };
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

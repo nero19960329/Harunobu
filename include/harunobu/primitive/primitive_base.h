@@ -7,7 +7,7 @@
 #include <harunobu/geometry/geometry_base.h>
 #include <harunobu/material/material_base.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class PrimitiveBase {
 public:
@@ -26,4 +26,4 @@ public:
     virtual void make_geos(const mat4 &trans_mat) = 0;
 }; // class PrimitiveBase
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

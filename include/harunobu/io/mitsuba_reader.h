@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class MitsubaReader : public SceneReader {
 private:
@@ -29,4 +29,4 @@ private:
     sptr<ObjectsBase> load_objects(rapidxml::xml_node<> *scene_node);
 };
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

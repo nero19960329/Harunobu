@@ -1,6 +1,6 @@
 #include <harunobu/core/camera.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 Camera::Camera(const vec3 &pos_, const vec3 &dir_, const vec3 &up_, real fov_,
                int height_, int width_)
@@ -28,4 +28,4 @@ void Camera::log_current_status() const {
     HARUNOBU_INFO("h, w = {}, {}", height, width);
 }
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

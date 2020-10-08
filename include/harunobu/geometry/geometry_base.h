@@ -2,7 +2,7 @@
 
 #include <harunobu/core/common.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class PrimitiveBase;
 
@@ -22,4 +22,4 @@ public:
     virtual void log_current_status() const = 0;
 }; // class GeomertyBase
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

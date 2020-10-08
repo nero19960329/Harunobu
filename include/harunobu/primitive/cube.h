@@ -3,7 +3,7 @@
 #include <harunobu/geometry/tri.h>
 #include <harunobu/primitive/primitive_base.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class Cube : public PrimitiveBase {
 public:
@@ -18,4 +18,4 @@ private:
                    const vec3 &normal);
 }; // class Cube
 
-}; // namespace harunobu
+}; // HARUNOBU_NAMESPACE_BEGIN

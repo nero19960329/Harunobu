@@ -4,7 +4,7 @@
 
 #include <harunobu/geometry/geometry_base.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class Tri : public GeometryBase {
 public:
@@ -22,4 +22,4 @@ public:
     virtual void log_current_status() const override;
 }; // class Tri
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

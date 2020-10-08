@@ -1,7 +1,7 @@
 #include <harunobu/geometry/tri.h>
 #include <harunobu/primitive/rect.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 Rect::Rect(sptr<MaterialBase> material_) : PrimitiveBase(material_) {}
 
@@ -29,4 +29,4 @@ void Rect::log_current_status() const {
     }
 }
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

@@ -2,7 +2,7 @@
 
 #include <harunobu/integrator/integrator_base.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class PathTracer : public IntegratorBase {
 public:
@@ -14,4 +14,4 @@ public:
     virtual cv::Mat integrate() override;
 }; // class PathTracer
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

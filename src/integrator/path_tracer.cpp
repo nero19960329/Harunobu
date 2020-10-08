@@ -1,7 +1,7 @@
 #include <harunobu/core/scene.h>
 #include <harunobu/integrator/path_tracer.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 PathTracer::PathTracer(sptr<Scene> scene_, int max_depth_)
     : IntegratorBase(scene_), max_depth(max_depth_) {}
@@ -11,4 +11,4 @@ cv::Mat PathTracer::integrate() {
                    CV_RGB(255, 255, 255));
 }
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

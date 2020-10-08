@@ -2,11 +2,11 @@
 
 #include <harunobu/material/material_base.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class BSDF : public MaterialBase {
 public:
     BSDF() : MaterialBase() {}
 }; // class BSDF
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

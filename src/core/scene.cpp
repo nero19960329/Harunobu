@@ -1,10 +1,10 @@
 #include <harunobu/core/scene.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
-cv::Mat Scene::render() {
+void Scene::render() {
     auto raw_image = integrator->integrate();
-    return raw_image;
+    image_pipeline->dump_image(raw_image);
 }
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

@@ -1,6 +1,6 @@
 #include <harunobu/material/material_base.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 void MaterialBase::log_current_status() const {
     HARUNOBU_INFO("MaterialBase");
@@ -8,4 +8,4 @@ void MaterialBase::log_current_status() const {
     HARUNOBU_INFO("rgb = {}", glm::to_string(rgb));
 }
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END

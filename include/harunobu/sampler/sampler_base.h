@@ -2,8 +2,8 @@
 
 #include <harunobu/core/common.h>
 
-namespace harunobu {
+HARUNOBU_NAMESPACE_BEGIN
 
 class SamplerBase {}; // class SamplerBase
 
-} // namespace harunobu
+HARUNOBU_NAMESPACE_END
