@@ -12,9 +12,9 @@ Ray Camera::make_ray(int i, int j) const {
     ray_dst += dir * static_cast<real>(1);
     real h = 2.0 * tan(fov * 0.5);
     real pixel = h / static_cast<real>(height);
-    ray_dst -=
-        up * static_cast<real>((height - 1) * 0.5 - j) * pixel +
-        glm::cross(dir, up) * static_cast<real>((width - 1) * 0.5 - i) * pixel;
+    auto horizontal = glm::normalize(glm::cross(dir, up));
+    ray_dst += up * static_cast<real>((height - 1) * 0.5 - j) * pixel -
+               horizontal * static_cast<real>((width - 1) * 0.5 - i) * pixel;
     vec3 ray_dir = glm::normalize(ray_dst - pos);
     return Ray(pos, ray_dir);
 }

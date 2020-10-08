@@ -19,6 +19,9 @@
 
 namespace harunobu {
 
+// math constants
+constexpr double pi() { return std::atan(1) * 4; }
+
 // macros
 #define HARUNOBU_NAMESPACE_BEGIN namespace harunobu {
 #define HARUNOBU_NAMESPACE_END }

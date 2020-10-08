@@ -174,7 +174,7 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
         auto node_name = node->first_attribute("name")->value();
         HARUNOBU_DEBUG("Traversing node {}-{}", node->name(), node_name);
         if (str_equal(node_name, "fov")) {
-            fov = atof(node->first_attribute("value")->value());
+            fov = atof(node->first_attribute("value")->value()) * pi() / 180.0;
         } else {
             IGNORE_ATTR(camera_node, node_name);
         }
