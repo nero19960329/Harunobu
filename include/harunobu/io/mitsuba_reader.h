@@ -1,6 +1,7 @@
 #pragma once
 
 #include <harunobu/core/camera.h>
+#include <harunobu/core/image_pipeline.h>
 #include <harunobu/integrator/integrator_base.h>
 #include <harunobu/io/scene_reader.h>
 #include <harunobu/material/material_base.h>
@@ -27,6 +28,7 @@ private:
     std::unordered_map<std::string, sptr<MaterialBase>>
     load_materials(rapidxml::xml_node<> *scene_node);
     sptr<ObjectsBase> load_objects(rapidxml::xml_node<> *scene_node);
+    sptr<ImagePipeline> load_image_pipeline(rapidxml::xml_node<> *film_node);
 };
 
 HARUNOBU_NAMESPACE_END

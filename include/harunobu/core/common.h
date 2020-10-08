@@ -20,8 +20,7 @@
 namespace harunobu {
 
 // macros
-#define HARUNOBU_NAMESPACE_BEGIN \
-    namespace harunobu {
+#define HARUNOBU_NAMESPACE_BEGIN namespace harunobu {
 #define HARUNOBU_NAMESPACE_END }
 
 // logger

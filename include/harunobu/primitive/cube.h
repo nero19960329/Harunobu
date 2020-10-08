@@ -17,5 +17,5 @@ private:
     make_rect_geos(const mat4 &trans_mat, const std::array<vec3, 4> &vertices,
                    const vec3 &normal);
 }; // class Cube
-
-}; // HARUNOBU_NAMESPACE_BEGIN
+}
+; // HARUNOBU_NAMESPACE_BEGIN

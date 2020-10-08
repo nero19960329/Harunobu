@@ -95,6 +95,11 @@ inline vec3 load_vec3(rapidxml::xml_attribute<> *vec_attr) {
 //============================ Class functions ============================
 
 sptr<Scene> MitsubaReader::load(std::string scene_file) {
+    HARUNOBU_INFO("Loading scene {} ...", scene_file);
+
+    auto output_name = split(split(scene_file, "/").back(), ".").front();
+    HARUNOBU_DEBUG("Output name is {} ...", output_name);
+
     rapidxml::file<> scene_xml(scene_file.c_str());
     rapidxml::xml_document<> doc;
     doc.parse<0>(scene_xml.data());
@@ -107,13 +112,18 @@ sptr<Scene> MitsubaReader::load(std::string scene_file) {
     CHECK_ANY_SUBNODE(scene_node, {"integrator"});
     auto integrator =
         load_integrator(scene_node->first_node("integrator"), scene);
-    auto camera = load_camera(scene_node->first_node("sensor"));
+    auto camera_node = scene_node->first_node("sensor");
+    auto camera = load_camera(camera_node);
     materials = load_materials(scene_node);
     auto objects = load_objects(scene_node);
+    CHECK_ANY_SUBNODE(camera_node, {"film"});
+    auto image_pipeline = load_image_pipeline(camera_node->first_node("film"));
+    image_pipeline->file_name = output_name;
 
     scene->integrator = integrator;
     scene->camera = camera;
     scene->objects = objects;
+    scene->image_pipeline = image_pipeline;
 
     return scene;
 }
@@ -288,6 +298,50 @@ MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
 
     HARUNOBU_CHECK(objects->build(), "Objects not partitioned successfully!");
     return objects;
+}
+
+sptr<ImagePipeline>
+MitsubaReader::load_image_pipeline(rapidxml::xml_node<> *film_node) {
+    HARUNOBU_DEBUG("Loading image_pipeline ...");
+
+    std::string file_format;
+    std::string pixel_format;
+    float gamma;
+
+    for (auto node = film_node->first_node("string"); node != nullptr;
+         node = node->next_sibling("string")) {
+        CHECK_ATTR(node, "name");
+        auto node_name = node->first_attribute("name")->value();
+        if (str_equal(node_name, "fileFormat")) {
+            file_format = node->first_attribute("value")->value();
+        } else if (str_equal(node_name, "pixelFormat")) {
+            pixel_format = node->first_attribute("value")->value();
+        } else {
+            IGNORE_SUBNODE(node, node_name);
+        }
+    }
+    HARUNOBU_CHECK(pixel_format == "rgb",
+                   "Only 'rgb' pixel_format is supported, which current "
+                   "pixel_format is {}.",
+                   pixel_format);
+
+    for (auto node = film_node->first_node("float"); node != nullptr;
+         node = node->next_sibling("float")) {
+        CHECK_ATTR(node, "name");
+        auto node_name = node->first_attribute("name")->value();
+        if (str_equal(node_name, "gamma")) {
+            gamma = atof(node->first_attribute("value")->value());
+        } else {
+            IGNORE_SUBNODE(node, node_name);
+        }
+    }
+
+    sptr<ImagePipeline> image_pipeline = std::make_shared<ImagePipeline>();
+    image_pipeline->gamma = gamma;
+    image_pipeline->file_format = file_format;
+
+    image_pipeline->log_current_status();
+    return image_pipeline;
 }
 
 HARUNOBU_NAMESPACE_END

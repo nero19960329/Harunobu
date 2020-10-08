@@ -8,7 +8,7 @@ PathTracer::PathTracer(sptr<Scene> scene_, int max_depth_)
 
 cv::Mat PathTracer::integrate() {
     return cv::Mat(scene->camera->height, scene->camera->width, CV_32FC3,
-                   CV_RGB(255, 255, 255));
+                   CV_RGB(1.2, .2, .2));
 }
 
 HARUNOBU_NAMESPACE_END

@@ -15,6 +15,6 @@ int main(int argc, char *argv[]) {
     harunobu::MitsubaReader scene_reader;
     auto scene = scene_reader.load(std::string(argv[1]));
     scene->render();
-    
+
     return 0;
 }
