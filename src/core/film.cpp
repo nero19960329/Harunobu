@@ -8,7 +8,7 @@ Film::Film(int width_, int height_) :
     recon_weight_sum = cv::Mat::zeros(height_, width_, CV_32FC1);
 }
 
-void Film::add_sample(const cv::Vec3f &rgb, real i, real j) {
+void Film::add_sample(const cv::Vec3f &bgr, real i, real j) {
     real rx = rfilter->rx, ry = rfilter->ry;
     int x_min = std::ceil(i - rx), y_min = std::ceil(j - ry);
     int x_max = std::ceil(i + rx), y_max = std::ceil(j + ry);
@@ -19,7 +19,7 @@ void Film::add_sample(const cv::Vec3f &rgb, real i, real j) {
     for (int x = x_min; x < x_max; ++x) {
         for (int y = y_min; y < y_max; ++y) {
             real recon_weight = rfilter->eval(i - x, j - y);
-            image.at<cv::Vec3f>(y, x) += rgb * recon_weight;
+            image.at<cv::Vec3f>(y, x) += bgr * recon_weight;
             recon_weight_sum.at<float>(y, x) += recon_weight;
         }
     }
