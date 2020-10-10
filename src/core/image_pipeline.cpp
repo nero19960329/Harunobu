@@ -7,11 +7,11 @@ void ImagePipeline::dump_image(const cv::Mat &raw_image) {
 
     // perform in float32
     clamp(image, 0.0f, 1.0f);
+    gamma_correction(image, gamma);
 
     image.convertTo(image, CV_8UC3, 255);
 
     // perform in uint8
-    gamma_correction(image, gamma);
 
     std::string output_name = file_name + "." + file_format;
     HARUNOBU_INFO("Dump into {} ...", output_name);
@@ -43,15 +43,14 @@ void ImagePipeline::gamma_correction(cv::Mat &image, real gamma) {
     HARUNOBU_ASSERT(image.type() == CV_8UC3,
                     "Only uint8 image could perform gamma corretion!");
 
-    real inverse_gamma = 1.0 / gamma;
-
-    cv::Mat lut(1, 256, CV_8UC1);
-    for (int i = 0; i < lut.cols; ++i) {
-        lut.at<uchar>(i) = static_cast<uchar>(
-            pow(static_cast<real>(i) / 255, inverse_gamma) * 255.0 + .5);
+    #pragma omp parallel for schedule(dynamic)
+    for (int i = 0; i < image.rows; ++i) {
+        for (int j = 0; j < image.cols; ++j) {
+            image.at<cv::Vec3f>(j, i)[0] = pow(image.at<cv::Vec3f>(j, i)[0], 1.0 / gamma);
+            image.at<cv::Vec3f>(j, i)[1] = pow(image.at<cv::Vec3f>(j, i)[1], 1.0 / gamma);
+            image.at<cv::Vec3f>(j, i)[2] = pow(image.at<cv::Vec3f>(j, i)[2], 1.0 / gamma);
+        }
     }
-
-    cv::LUT(image, lut, image);
 }
 
 HARUNOBU_NAMESPACE_END

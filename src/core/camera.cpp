@@ -7,7 +7,7 @@ Camera::Camera(const vec3 &pos_, const vec3 &dir_, const vec3 &up_, real fov_,
     : pos(pos_), dir(dir_), up(up_), fov(fov_), height(height_), width(width_) {
 }
 
-Ray Camera::make_ray(int i, int j) const {
+Ray Camera::make_ray(real i, real j) const {
     vec3 ray_dst = pos;
     ray_dst += dir * static_cast<real>(1);
     real h = 2.0 * tan(fov * 0.5);

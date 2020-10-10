@@ -1,5 +1,6 @@
 #include <harunobu/core/utils.h>
 #include <harunobu/geometry/tri.h>
+#include <harunobu/primitive/primitive_base.h>
 
 HARUNOBU_NAMESPACE_BEGIN
 
@@ -7,8 +8,9 @@ Tri::Tri(const PrimitiveBase *parent_prim_,
          const std::array<vec3, 3> &vertices_,
          const std::array<vec3, 3> &normals_)
     : GeometryBase(parent_prim_), vertices(vertices_), normals(normals_) {
-    normal_geo = glm::normalize(
-        glm::cross(vertices[1] - vertices[0], vertices[2] - vertices[1]));
+    auto cross_product = glm::cross(vertices[1] - vertices[0], vertices[2] - vertices[1]);
+    normal_geo = glm::normalize(cross_product);
+    area = glm::length(cross_product) * 0.5;
 }
 
 void Tri::do_transform(const mat4 &trans_mat) {
@@ -20,6 +22,7 @@ void Tri::do_transform(const mat4 &trans_mat) {
         n = glm::normalize(n);
     }
     normal_geo = glm::normalize(vec4(normal_geo, 0) * trans_mat);
+    area = glm::length(glm::cross(vertices[1] - vertices[0], vertices[2] - vertices[1])) * 0.5;
 }
 
 sptr<Intersect> Tri::ray_intersect(const Ray &ray, bool &is_intersect) {
@@ -32,9 +35,8 @@ sptr<Intersect> Tri::ray_intersect(const Ray &ray, bool &is_intersect) {
         0.0 <= bary[2] && bary[2] <= 1.0 && t >= 0.0) {
         intersect->ray_step = t;
         intersect->pos = inter_pos;
-        intersect->normal =
-            normals[0] * bary[0] + normals[1] * bary[1] + normals[2] * bary[2];
         intersect->prim = parent_prim;
+        intersect->normal = normals[0] * bary[0] + normals[1] * bary[1] + normals[2] * bary[2];
         is_intersect = true;
     } else {
         is_intersect = false;
@@ -60,6 +62,13 @@ vec3 Tri::get_barycentric_coordinate(const vec3 &pos) {
     real v = (dot00 * dot12 - dot01 * dot02) * inv_denom;
 
     return vec3(1.0 - u - v, v, u);
+}
+
+vec3 Tri::random_sample() {
+    real u = rng.random_real();
+    real v = rng.random_real();
+    return static_cast<real>(1.0 - u - v) * vertices[0] + v * vertices[1] +
+           u * vertices[2];
 }
 
 void Tri::log_current_status() const {

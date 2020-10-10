@@ -12,7 +12,10 @@ HARUNOBU_NAMESPACE_BEGIN
 class PrimitiveBase {
 public:
     sptr<MaterialBase> material;
+    vec3 emit_radiance;
     std::vector<sptr<GeometryBase>> geos;
+
+    real area;
 
 public:
     PrimitiveBase(sptr<MaterialBase> material_);
@@ -24,6 +27,10 @@ public:
                                        const mat4 &trans_mat);
 
     virtual void make_geos(const mat4 &trans_mat) = 0;
+    virtual vec3 random_sample() = 0;
+
+private:
+    real get_area();
 }; // class PrimitiveBase
 
 HARUNOBU_NAMESPACE_END

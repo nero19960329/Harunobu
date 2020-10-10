@@ -11,6 +11,7 @@ public:
 
     virtual void make_geos(const mat4 &trans_mat) override;
     virtual void log_current_status() const override;
+    virtual vec3 random_sample() override;
 
 private:
     std::pair<sptr<Tri>, sptr<Tri>>

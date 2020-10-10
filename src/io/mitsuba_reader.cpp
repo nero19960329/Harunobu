@@ -1,7 +1,8 @@
 #include <harunobu/core/utils.h>
 #include <harunobu/integrator/path_tracer.h>
 #include <harunobu/io/mitsuba_reader.h>
-#include <harunobu/material/bsdf.h>
+#include <harunobu/material/diffuse.h>
+#include <harunobu/sampler/random_sampler.h>
 
 #include <rapidxml/rapidxml_utils.hpp>
 
@@ -113,16 +114,20 @@ sptr<Scene> MitsubaReader::load(std::string scene_file) {
     auto integrator =
         load_integrator(scene_node->first_node("integrator"), scene);
     auto camera_node = scene_node->first_node("sensor");
+    CHECK_ANY_SUBNODE(camera_node, {"sampler"});
+    auto sampler = load_sampler(camera_node->first_node("sampler"));
     auto camera = load_camera(camera_node);
     materials = load_materials(scene_node);
-    auto objects = load_objects(scene_node);
+    auto [objects, lights] = load_objects(scene_node);
     CHECK_ANY_SUBNODE(camera_node, {"film"});
     auto image_pipeline = load_image_pipeline(camera_node->first_node("film"));
     image_pipeline->file_name = output_name;
 
     scene->integrator = integrator;
+    scene->integrator->sampler = sampler;
     scene->camera = camera;
     scene->objects = objects;
+    scene->lights = lights;
     scene->image_pipeline = image_pipeline;
 
     return scene;
@@ -158,6 +163,24 @@ MitsubaReader::load_integrator(rapidxml::xml_node<> *integrator_node,
                        integrator_type);
     }
     return integrator;
+}
+
+sptr<SamplerBase> MitsubaReader::load_sampler(rapidxml::xml_node<> *sampler_node) {
+    HARUNOBU_DEBUG("Loading sampler ...");
+    CHECK_ATTR(sampler_node, "type");
+    HARUNOBU_WARN("All type of sampler would cast into RandomSampler.");
+    CHECK_ANY_SUBNODE(sampler_node, {"integer"});
+    sptr<SamplerBase> sampler = std::make_shared<RandomSampler>();
+    for (auto node = sampler_node->first_node("integer"); node != nullptr; node = node->next_sibling("integer")) {
+        CHECK_ATTR(node, "name");
+        CHECK_ATTR(node, "value");
+        if (str_equal(node->first_attribute("name")->value(), "sampleCount")) {
+            sampler->sample_count = atoi(node->first_attribute("value")->value());
+        } else {
+            IGNORE_SUBNODE(sampler_node, node->first_attribute("name")->value());
+        }
+    }
+    return sampler;
 }
 
 sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
@@ -241,21 +264,26 @@ MitsubaReader::load_materials(rapidxml::xml_node<> *scene_node) {
     std::unordered_map<std::string, sptr<MaterialBase>> materials;
     for (auto node = scene_node->first_node("bsdf"); node != nullptr;
          node = node->next_sibling("bsdf")) {
-        CHECK_ATTR_VALUE(node, "type", "twosided");
+        CHECK_ATTR(node, "type");
         CHECK_ATTR(node, "id");
-        CHECK_ANY_SUBNODE(node, {"bsdf"});
         std::string id = node->first_attribute("id")->value();
+        auto bsdf_node = node;
+        bool is_two_sided = false;
+        if (str_equal(node->first_attribute("type")->value(), "twosided")) {
+            CHECK_ANY_SUBNODE(node, {"bsdf"});
+            bsdf_node = node->first_node("bsdf");
+            is_two_sided = true;
+        }
 
-        auto bsdf_node = node->first_node("bsdf");
         CHECK_ATTR_VALUE(bsdf_node, "type", "diffuse");
         CHECK_ANY_SUBNODE(bsdf_node, {"rgb"});
-
         auto rgb_node = bsdf_node->first_node("rgb");
-        sptr<MaterialBase> material = std::make_shared<BSDF>();
+        sptr<MaterialBase> material = std::make_shared<Diffuse>();
         if (rgb_node != nullptr) {
             CHECK_ATTR_VALUE(rgb_node, "name", "reflectance");
             material->name = id;
             material->rgb = load_vec3(rgb_node->first_attribute("value"));
+            material->is_two_sided = is_two_sided;
         }
         materials[id] = material;
     }
@@ -263,11 +291,12 @@ MitsubaReader::load_materials(rapidxml::xml_node<> *scene_node) {
     return materials;
 }
 
-sptr<ObjectsBase>
+std::pair<sptr<ObjectsBase>, sptr<ObjectsBase>>
 MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
-    HARUNOBU_DEBUG("Loading objects ...");
+    HARUNOBU_DEBUG("Loading objects & lights ...");
 
     sptr<ObjectsBase> objects = std::make_shared<ObjectsBase>();
+    sptr<ObjectsBase> lights = std::make_shared<ObjectsBase>();
 
     for (auto node = scene_node->first_node("shape"); node != nullptr;
          node = node->next_sibling("shape")) {
@@ -290,14 +319,31 @@ MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
                        "Material '{}' is not mentioned before!", ref_mate_id);
         auto material = materials[ref_mate_id];
 
+        auto emitter_node = node->first_node("emitter");
+        vec3 emit_radiance(0, 0, 0);
+        if (emitter_node != nullptr) {
+            CHECK_ANY_SUBNODE(emitter_node, {"rgb"});
+            auto emitter_rgb_node = emitter_node->first_node("rgb");
+            CHECK_ATTR_VALUE(emitter_rgb_node, "name", "radiance");
+            CHECK_ATTR(emitter_rgb_node, "value");
+            emit_radiance =
+                load_vec3(emitter_rgb_node->first_attribute("value"));
+        }
+
         std::string prim_name = node->first_attribute("type")->value();
         auto prim = PrimitiveBase::factory(prim_name, material, trans_mat);
+        prim->emit_radiance = emit_radiance;
         prim->log_current_status();
+
         objects->add_primitive(prim);
+        if (emitter_node != nullptr) {
+            lights->add_primitive(prim);
+        }
     }
 
     HARUNOBU_CHECK(objects->build(), "Objects not partitioned successfully!");
-    return objects;
+    HARUNOBU_CHECK(lights->build(), "Lights not partitioned successfully!");
+    return std::make_pair(objects, lights);
 }
 
 sptr<ImagePipeline>

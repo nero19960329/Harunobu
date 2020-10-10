@@ -14,6 +14,7 @@ class Scene {
 public:
     sptr<Camera> camera;
     sptr<ObjectsBase> objects;
+    sptr<ObjectsBase> lights;
     sptr<IntegratorBase> integrator;
     sptr<ImagePipeline> image_pipeline;
 

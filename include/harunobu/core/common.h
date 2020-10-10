@@ -11,16 +11,15 @@
 #include <spdlog/spdlog.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtx/norm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 #include <cmath>
 #include <cstdlib>
 #include <memory>
+#include <random>
 
 namespace harunobu {
-
-// math constants
-constexpr double pi() { return std::atan(1) * 4; }
 
 // macros
 #define HARUNOBU_NAMESPACE_BEGIN namespace harunobu {
@@ -62,6 +61,10 @@ using mat3 = glm::mat3;
 using mat4 = glm::mat4;
 #endif
 
+// math constants
+constexpr double pi() { return std::atan(1) * 4; }
+inline constexpr real eps = 1e-6;
+
 // abbrs
 template <typename T> using sptr = std::shared_ptr<T>;
 
@@ -86,6 +89,33 @@ template <typename T> using sptr = std::shared_ptr<T>;
             exit(1);                                                           \
         }                                                                      \
     }
+
+// random number
+class RNG {
+private:
+    std::mt19937 rng;
+    std::uniform_real_distribution<real> real_dist;
+    std::uniform_int_distribution<std::mt19937::result_type> int_dist;
+
+public:
+    RNG()
+        : real_dist(0, 1),
+          int_dist(0, std::numeric_limits<std::mt19937::result_type>::max()) {
+        rng.seed(std::random_device()());
+    }
+
+    real random_real() { return real_dist(rng); }
+
+    real random_real(real min_value, real max_value) {
+        return real_dist(rng) * (max_value - min_value) + min_value;
+    }
+
+    size_t random_idx(size_t min_value, size_t max_value) {
+        return int_dist(rng) % (max_value - min_value + 1) + min_value;
+    }
+
+}; // class RNG
+inline RNG rng;
 
 // initialize all envs
 inline void initialize_env() { initialize_logger(); }

@@ -16,7 +16,7 @@ public:
     Camera(const vec3 &pos_, const vec3 &dir_, const vec3 &up_, real fov_,
            int height_, int width_);
 
-    Ray make_ray(int i, int j) const;
+    Ray make_ray(real i, real j) const;
 
     void log_current_status() const;
 }; // class Camera
