@@ -1,6 +1,7 @@
 #pragma once
 
 #include <harunobu/core/common.h>
+#include <harunobu/core/film.h>
 #include <harunobu/sampler/sampler_base.h>
 
 #include <opencv2/opencv.hpp>
@@ -13,6 +14,7 @@ class IntegratorBase {
 public:
     sptr<Scene> scene;
     sptr<SamplerBase> sampler;
+    sptr<Film> film;
 
 public:
     IntegratorBase(sptr<Scene> scene_) : scene(scene_) {}

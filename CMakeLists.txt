@@ -36,6 +36,7 @@ file(GLOB HARUNOBU_SRC
   "src/material/*.cpp"
   "src/objects/*.cpp"
   "src/primitive/*.cpp"
+  "src/rfilter/*.cpp"
 )
 add_library(harunobu SHARED
   ${HARUNOBU_SRC})

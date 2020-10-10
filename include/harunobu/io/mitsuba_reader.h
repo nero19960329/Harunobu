@@ -1,11 +1,13 @@
 #pragma once
 
 #include <harunobu/core/camera.h>
+#include <harunobu/core/film.h>
 #include <harunobu/core/image_pipeline.h>
 #include <harunobu/integrator/integrator_base.h>
 #include <harunobu/io/scene_reader.h>
 #include <harunobu/material/material_base.h>
 #include <harunobu/objects/objects_base.h>
+#include <harunobu/rfilter/rfilter_base.h>
 #include <harunobu/sampler/sampler_base.h>
 
 #include <rapidxml/rapidxml.hpp>
@@ -32,6 +34,8 @@ private:
     std::pair<sptr<ObjectsBase>, sptr<ObjectsBase>>
     load_objects(rapidxml::xml_node<> *scene_node);
     sptr<ImagePipeline> load_image_pipeline(rapidxml::xml_node<> *film_node);
+    sptr<RFilterBase> load_rfilter(rapidxml::xml_node<> *rfilter_node);
+    sptr<Film> load_film(rapidxml::xml_node<> *film_node);
 };
 
 HARUNOBU_NAMESPACE_END

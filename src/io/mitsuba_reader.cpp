@@ -122,9 +122,11 @@ sptr<Scene> MitsubaReader::load(std::string scene_file) {
     CHECK_ANY_SUBNODE(camera_node, {"film"});
     auto image_pipeline = load_image_pipeline(camera_node->first_node("film"));
     image_pipeline->file_name = output_name;
+    auto film = load_film(camera_node->first_node("film"));
 
     scene->integrator = integrator;
     scene->integrator->sampler = sampler;
+    scene->integrator->film = film;
     scene->camera = camera;
     scene->objects = objects;
     scene->lights = lights;
@@ -228,24 +230,8 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
         up = load_vec3(trans_lookat_node->first_attribute("up"));
     }
 
-    // Load film
-    auto film_node = camera_node->first_node("film");
-    CHECK_ATTR_VALUE(film_node, "type", "ldrfilm");
-    for (auto node = film_node->first_node("integer"); node != nullptr;
-         node = node->next_sibling("integer")) {
-        auto node_name = node->first_attribute("name")->value();
-        HARUNOBU_DEBUG("Traversing node {}-{}", node->name(), node_name);
-        if (str_equal(node_name, "width")) {
-            width = atoi(node->first_attribute("value")->value());
-        } else if (str_equal(node_name, "height")) {
-            height = atoi(node->first_attribute("value")->value());
-        } else {
-            IGNORE_ATTR(camera_node, node_name);
-        }
-    }
-
     sptr<Camera> camera =
-        std::make_shared<Camera>(pos, dir, up, fov, height, width);
+        std::make_shared<Camera>(pos, dir, up, fov);
     camera->log_current_status();
     return camera;
 }
@@ -388,6 +374,41 @@ MitsubaReader::load_image_pipeline(rapidxml::xml_node<> *film_node) {
 
     image_pipeline->log_current_status();
     return image_pipeline;
+}
+
+sptr<RFilterBase> MitsubaReader::load_rfilter(rapidxml::xml_node<> *rfilter_node) {
+    HARUNOBU_DEBUG("Loading rfilter ...");
+
+    CHECK_ATTR(rfilter_node, "type");
+    std::string rfilter_type = rfilter_node->first_attribute("type")->value();
+    sptr<RFilterBase> rfilter = RFilterBase::factory(rfilter_type);
+    return rfilter;
+}
+
+sptr<Film> MitsubaReader::load_film(rapidxml::xml_node<> *film_node) {
+    HARUNOBU_DEBUG("Loading film ...");
+
+    int width, height;
+
+    CHECK_ATTR_VALUE(film_node, "type", "ldrfilm");
+    for (auto node = film_node->first_node("integer"); node != nullptr;
+         node = node->next_sibling("integer")) {
+        auto node_name = node->first_attribute("name")->value();
+        HARUNOBU_DEBUG("Traversing node {}-{}", node->name(), node_name);
+        if (str_equal(node_name, "width")) {
+            width = atoi(node->first_attribute("value")->value());
+        } else if (str_equal(node_name, "height")) {
+            height = atoi(node->first_attribute("value")->value());
+        } else {
+            IGNORE_ATTR(film_node, node_name);
+        }
+    }
+    auto film = std::make_shared<Film>(width, height);
+    CHECK_ANY_SUBNODE(film_node, {"rfilter"});
+    film->rfilter = load_rfilter(film_node->first_node("rfilter"));
+
+    film->log_current_status();
+    return film;
 }
 
 HARUNOBU_NAMESPACE_END

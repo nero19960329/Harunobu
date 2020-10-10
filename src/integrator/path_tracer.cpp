@@ -7,8 +7,7 @@ PathTracer::PathTracer(sptr<Scene> scene_, int max_depth_)
     : IntegratorBase(scene_), max_depth(max_depth_) {}
 
 cv::Mat PathTracer::integrate() {
-    sptr<Camera> camera = scene->camera;
-    cv::Mat raw_image(camera->height, camera->width, CV_32FC3,
+    cv::Mat raw_image(film->height, film->width, CV_32FC3,
                       CV_RGB(0., 0., 0.));
 
     #pragma omp parallel for schedule(dynamic)
@@ -20,13 +19,13 @@ cv::Mat PathTracer::integrate() {
             int sample_count = sampler->sample_count;
             for (int k = 0; k < sample_count; ++k) {
                 auto ij = sampler->sample_screen_coor(i, j);
-                auto rgb = integrate_ray(camera->make_ray(ij[0], ij[1]));
-                // bgr(cv) <- rgb
-                raw_image.at<cv::Vec3f>(j, i) += cv::Vec3f(rgb[2], rgb[1], rgb[0]) / sample_count;
+                auto rgb = integrate_ray(scene->camera->make_ray(ij[0], ij[1], film->height, film->width));
+                cv::Vec3f bgr(rgb[2], rgb[1], rgb[0]);
+                film->add_sample(bgr, ij[0], ij[1]);
             }
         }
     }
-    return raw_image;
+    return film->make_image();
 }
 
 vec3 PathTracer::integrate_ray(const Ray &ray) {

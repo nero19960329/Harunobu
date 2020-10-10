@@ -2,12 +2,11 @@
 
 HARUNOBU_NAMESPACE_BEGIN
 
-Camera::Camera(const vec3 &pos_, const vec3 &dir_, const vec3 &up_, real fov_,
-               int height_, int width_)
-    : pos(pos_), dir(dir_), up(up_), fov(fov_), height(height_), width(width_) {
+Camera::Camera(const vec3 &pos_, const vec3 &dir_, const vec3 &up_, real fov_)
+    : pos(pos_), dir(dir_), up(up_), fov(fov_) {
 }
 
-Ray Camera::make_ray(real i, real j) const {
+Ray Camera::make_ray(real i, real j, int height, int width) const {
     vec3 ray_dst = pos;
     ray_dst += dir * static_cast<real>(1);
     real h = 2.0 * tan(fov * 0.5);
@@ -25,7 +24,6 @@ void Camera::log_current_status() const {
     HARUNOBU_INFO("dir = {}", glm::to_string(dir));
     HARUNOBU_INFO("up = {}", glm::to_string(up));
     HARUNOBU_INFO("fov = {}", fov);
-    HARUNOBU_INFO("h, w = {}, {}", height, width);
 }
 
 HARUNOBU_NAMESPACE_END

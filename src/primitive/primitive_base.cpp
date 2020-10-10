@@ -21,7 +21,7 @@ sptr<PrimitiveBase> PrimitiveBase::factory(std::string name,
         prim->get_area();
         return prim;
     } else {
-        HARUNOBU_CHECK(false, "Unsupported shape '{}'!", name)
+        HARUNOBU_CHECK(false, "Unsupported shape '{}'!", name);
     }
 }
 
