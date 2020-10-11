@@ -47,11 +47,6 @@ vec3 PathTracer::integrate_ray(const Ray &ray) {
         vec3 wi = glm::normalize(x_prime - x);
         vec3 wo = -ray.dir;
 
-        if (intersect->prim == light.get()) {
-            // just this light
-            continue;
-        }
-
         Ray light_test_ray(x, wi);
         light_test_ray.pos = light_test_ray.step(eps);
         bool is_intersect_light;

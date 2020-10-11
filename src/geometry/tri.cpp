@@ -65,10 +65,11 @@ vec3 Tri::get_barycentric_coordinate(const vec3 &pos) {
 }
 
 vec3 Tri::random_sample() {
-    real u = rng.random_real();
+    // P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C
+    real sqrt_u = std::sqrt(rng.random_real());
     real v = rng.random_real();
-    return static_cast<real>(1.0 - u - v) * vertices[0] + v * vertices[1] +
-           u * vertices[2];
+    real a = 1. - sqrt_u, b = sqrt_u * (1. - v), c = sqrt_u * v;
+    return a * vertices[0] + b * vertices[1] + c * vertices[2];
 }
 
 void Tri::log_current_status() const {
