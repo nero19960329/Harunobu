@@ -13,6 +13,7 @@ class Intersect {
 public:
     real ray_step;
     vec3 pos, normal;
+    vec3 omega;
     const PrimitiveBase *prim;
 
     Intersect() {}

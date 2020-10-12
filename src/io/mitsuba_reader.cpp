@@ -1,5 +1,5 @@
+#include <harunobu/core/param_set.h>
 #include <harunobu/core/utils.h>
-#include <harunobu/integrator/path_tracer.h>
 #include <harunobu/io/mitsuba_reader.h>
 #include <harunobu/material/diffuse.h>
 #include <harunobu/sampler/random_sampler.h>
@@ -141,7 +141,9 @@ MitsubaReader::load_integrator(rapidxml::xml_node<> *integrator_node,
     HARUNOBU_DEBUG("Loading integrator ...");
     CHECK_ATTR_VALUE(integrator_node, "type", "path");
 
-    int max_depth;
+    std::unordered_map<std::string, std::string> type_map{
+        {"direct", "direct"}, {"path", "path_tracer"}};
+    ParamSet param_set;
 
     // Load integer
     for (auto node = integrator_node->first_node("integer"); node != nullptr;
@@ -149,22 +151,20 @@ MitsubaReader::load_integrator(rapidxml::xml_node<> *integrator_node,
         auto node_name = node->first_attribute("name")->value();
         HARUNOBU_DEBUG("Traversing node {}-{}", node->name(), node_name);
         if (str_equal(node_name, "maxDepth")) {
-            max_depth = atoi(node->first_attribute("value")->value());
+            param_set.add("max_depth",
+                          atoi(node->first_attribute("value")->value()));
+        } else if (str_equal(node_name, "emitterSamples")) {
+            param_set.add("light_sample_num",
+                          atoi(node->first_attribute("value")->value()));
         } else {
             IGNORE_ATTR(integrator_node, node_name);
         }
     }
 
-    std::string integrator_type =
+    std::string mitsuba_integrator_type =
         integrator_node->first_attribute("type")->value();
-    sptr<IntegratorBase> integrator;
-    if (integrator_type == "path") {
-        integrator = std::make_shared<PathTracer>(scene, max_depth);
-    } else {
-        HARUNOBU_CHECK(false, "Unsupported integrator type '{}'!",
-                       integrator_type);
-    }
-    return integrator;
+    return IntegratorBase::factory(type_map[mitsuba_integrator_type], scene,
+                                   param_set);
 }
 
 sptr<SamplerBase>

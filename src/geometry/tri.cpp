@@ -41,6 +41,7 @@ sptr<Intersect> Tri::ray_intersect(const Ray &ray, bool &is_intersect) {
         intersect->prim = parent_prim;
         intersect->normal =
             normals[0] * bary[0] + normals[1] * bary[1] + normals[2] * bary[2];
+        intersect->omega = -ray.dir;
         is_intersect = true;
     } else {
         is_intersect = false;

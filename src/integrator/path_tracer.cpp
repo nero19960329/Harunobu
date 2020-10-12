@@ -1,5 +1,6 @@
 #include <harunobu/core/scene.h>
 #include <harunobu/integrator/path_tracer.h>
+#include <harunobu/integrator/render_utils.h>
 
 HARUNOBU_NAMESPACE_BEGIN
 
@@ -40,35 +41,8 @@ vec3 PathTracer::integrate_ray(const Ray &ray) {
     vec3 color = intersect->prim->emit_radiance;
 
     // direct illumination
-    // sum over all lights
-    for (const auto &light : scene->lights->prims) {
-        vec3 x_prime = light->random_sample();
-        vec3 x = intersect->pos;
-        vec3 wi = glm::normalize(x_prime - x);
-        vec3 wo = -ray.dir;
-
-        Ray light_test_ray(x, wi);
-        light_test_ray.pos = light_test_ray.step(eps);
-        bool is_intersect_light;
-        auto intersect_light =
-            scene->objects->ray_intersect(light_test_ray, is_intersect_light);
-        if (!is_intersect_light || intersect_light->prim != light.get()) {
-            // test failed, shadow
-            continue;
-        }
-
-        real cos_theta_i =
-            std::max(intersect->normal_dot(wi), static_cast<real>(0));
-        real cos_theta_o = std::max(glm::dot(intersect_light->normal, -wi),
-                                    static_cast<real>(0));
-
-        real area = light->area;
-        vec3 radiance = light->emit_radiance;
-        vec3 f = intersect->prim->material->f(wi, wo);
-        real G = cos_theta_i * cos_theta_o / glm::length2(x - x_prime);
-
-        color += radiance * area * f * G;
-    }
+    color += RenderUtils::get_direct_radiance(scene->lights->prims, intersect,
+                                              scene->objects);
 
     return color;
 }
