@@ -139,7 +139,7 @@ sptr<IntegratorBase>
 MitsubaReader::load_integrator(rapidxml::xml_node<> *integrator_node,
                                sptr<Scene> scene) {
     HARUNOBU_DEBUG("Loading integrator ...");
-    CHECK_ATTR_VALUE(integrator_node, "type", "path");
+    CHECK_ATTR(integrator_node, "type");
 
     std::unordered_map<std::string, std::string> type_map{
         {"direct", "direct"}, {"path", "path_tracer"}};
