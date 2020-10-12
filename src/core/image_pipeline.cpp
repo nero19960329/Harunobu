@@ -6,8 +6,8 @@ void ImagePipeline::dump_image(const cv::Mat &raw_image) {
     cv::Mat image = raw_image;
 
     // perform in float32
-    clamp(image, 0.0f, 1.0f);
     gamma_correction(image, gamma);
+    clamp(image, 0.0f, 1.0f);
 
     image.convertTo(image, CV_8UC3, 255);
 
@@ -43,12 +43,15 @@ void ImagePipeline::gamma_correction(cv::Mat &image, real gamma) {
     HARUNOBU_ASSERT(image.type() == CV_8UC3,
                     "Only uint8 image could perform gamma corretion!");
 
-    #pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < image.rows; ++i) {
         for (int j = 0; j < image.cols; ++j) {
-            image.at<cv::Vec3f>(j, i)[0] = pow(image.at<cv::Vec3f>(j, i)[0], 1.0 / gamma);
-            image.at<cv::Vec3f>(j, i)[1] = pow(image.at<cv::Vec3f>(j, i)[1], 1.0 / gamma);
-            image.at<cv::Vec3f>(j, i)[2] = pow(image.at<cv::Vec3f>(j, i)[2], 1.0 / gamma);
+            image.at<cv::Vec3f>(j, i)[0] =
+                pow(image.at<cv::Vec3f>(j, i)[0], 1.0 / gamma);
+            image.at<cv::Vec3f>(j, i)[1] =
+                pow(image.at<cv::Vec3f>(j, i)[1], 1.0 / gamma);
+            image.at<cv::Vec3f>(j, i)[2] =
+                pow(image.at<cv::Vec3f>(j, i)[2], 1.0 / gamma);
         }
     }
 }

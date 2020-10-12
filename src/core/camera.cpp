@@ -3,8 +3,7 @@
 HARUNOBU_NAMESPACE_BEGIN
 
 Camera::Camera(const vec3 &pos_, const vec3 &dir_, const vec3 &up_, real fov_)
-    : pos(pos_), dir(dir_), up(up_), fov(fov_) {
-}
+    : pos(pos_), dir(dir_), up(up_), fov(fov_) {}
 
 Ray Camera::make_ray(real i, real j, int height, int width) const {
     vec3 ray_dst = pos;

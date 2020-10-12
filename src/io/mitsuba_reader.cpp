@@ -167,19 +167,23 @@ MitsubaReader::load_integrator(rapidxml::xml_node<> *integrator_node,
     return integrator;
 }
 
-sptr<SamplerBase> MitsubaReader::load_sampler(rapidxml::xml_node<> *sampler_node) {
+sptr<SamplerBase>
+MitsubaReader::load_sampler(rapidxml::xml_node<> *sampler_node) {
     HARUNOBU_DEBUG("Loading sampler ...");
     CHECK_ATTR(sampler_node, "type");
     HARUNOBU_WARN("All type of sampler would cast into RandomSampler.");
     CHECK_ANY_SUBNODE(sampler_node, {"integer"});
     sptr<SamplerBase> sampler = std::make_shared<RandomSampler>();
-    for (auto node = sampler_node->first_node("integer"); node != nullptr; node = node->next_sibling("integer")) {
+    for (auto node = sampler_node->first_node("integer"); node != nullptr;
+         node = node->next_sibling("integer")) {
         CHECK_ATTR(node, "name");
         CHECK_ATTR(node, "value");
         if (str_equal(node->first_attribute("name")->value(), "sampleCount")) {
-            sampler->sample_count = atoi(node->first_attribute("value")->value());
+            sampler->sample_count =
+                atoi(node->first_attribute("value")->value());
         } else {
-            IGNORE_SUBNODE(sampler_node, node->first_attribute("name")->value());
+            IGNORE_SUBNODE(sampler_node,
+                           node->first_attribute("name")->value());
         }
     }
     return sampler;
@@ -230,8 +234,7 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
         up = load_vec3(trans_lookat_node->first_attribute("up"));
     }
 
-    sptr<Camera> camera =
-        std::make_shared<Camera>(pos, dir, up, fov);
+    sptr<Camera> camera = std::make_shared<Camera>(pos, dir, up, fov);
     camera->log_current_status();
     return camera;
 }
@@ -376,7 +379,8 @@ MitsubaReader::load_image_pipeline(rapidxml::xml_node<> *film_node) {
     return image_pipeline;
 }
 
-sptr<RFilterBase> MitsubaReader::load_rfilter(rapidxml::xml_node<> *rfilter_node) {
+sptr<RFilterBase>
+MitsubaReader::load_rfilter(rapidxml::xml_node<> *rfilter_node) {
     HARUNOBU_DEBUG("Loading rfilter ...");
 
     CHECK_ATTR(rfilter_node, "type");

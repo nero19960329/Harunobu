@@ -2,8 +2,7 @@
 
 HARUNOBU_NAMESPACE_BEGIN
 
-Film::Film(int width_, int height_) :
-    width(width_), height(height_) {
+Film::Film(int width_, int height_) : width(width_), height(height_) {
     image = cv::Mat::zeros(height_, width_, CV_32FC3);
     recon_weight_sum = cv::Mat::zeros(height_, width_, CV_32FC1);
 }
@@ -23,7 +22,6 @@ void Film::add_sample(const cv::Vec3f &bgr, real i, real j) {
             recon_weight_sum.at<float>(y, x) += recon_weight;
         }
     }
-    //getchar();
 }
 
 cv::Mat Film::make_image() {

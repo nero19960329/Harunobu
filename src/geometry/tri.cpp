@@ -8,7 +8,8 @@ Tri::Tri(const PrimitiveBase *parent_prim_,
          const std::array<vec3, 3> &vertices_,
          const std::array<vec3, 3> &normals_)
     : GeometryBase(parent_prim_), vertices(vertices_), normals(normals_) {
-    auto cross_product = glm::cross(vertices[1] - vertices[0], vertices[2] - vertices[1]);
+    auto cross_product =
+        glm::cross(vertices[1] - vertices[0], vertices[2] - vertices[1]);
     normal_geo = glm::normalize(cross_product);
     area = glm::length(cross_product) * 0.5;
 }
@@ -22,7 +23,9 @@ void Tri::do_transform(const mat4 &trans_mat) {
         n = glm::normalize(n);
     }
     normal_geo = glm::normalize(vec4(normal_geo, 0) * trans_mat);
-    area = glm::length(glm::cross(vertices[1] - vertices[0], vertices[2] - vertices[1])) * 0.5;
+    area = glm::length(glm::cross(vertices[1] - vertices[0],
+                                  vertices[2] - vertices[1])) *
+           0.5;
 }
 
 sptr<Intersect> Tri::ray_intersect(const Ray &ray, bool &is_intersect) {
@@ -36,7 +39,8 @@ sptr<Intersect> Tri::ray_intersect(const Ray &ray, bool &is_intersect) {
         intersect->ray_step = t;
         intersect->pos = inter_pos;
         intersect->prim = parent_prim;
-        intersect->normal = normals[0] * bary[0] + normals[1] * bary[1] + normals[2] * bary[2];
+        intersect->normal =
+            normals[0] * bary[0] + normals[1] * bary[1] + normals[2] * bary[2];
         is_intersect = true;
     } else {
         is_intersect = false;
