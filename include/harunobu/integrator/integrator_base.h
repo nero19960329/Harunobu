@@ -23,7 +23,7 @@ public:
     virtual cv::Mat integrate() = 0;
 
     static sptr<IntegratorBase> factory(std::string name, sptr<Scene> scene,
-                                        ParamSet param_set);
+                                        ParamSet &param_set);
 }; // class IntegratorBase
 
 HARUNOBU_NAMESPACE_END

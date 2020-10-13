@@ -2,6 +2,18 @@
 
 HARUNOBU_NAMESPACE_BEGIN
 
+Cube::Cube(sptr<MaterialBase> material_) : PrimitiveBase(material_) {}
+
+void Cube::init(ParamSet &param_set) {
+    auto trans_mat = param_set.get<mat4>("transform", mat4(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1));
+    make_geos(trans_mat);
+    make_area();
+}
+
 std::pair<sptr<Tri>, sptr<Tri>>
 Cube::make_rect_geos(const mat4 &trans_mat, const std::array<vec3, 4> &vertices,
                      const vec3 &normal) {
@@ -15,8 +27,6 @@ Cube::make_rect_geos(const mat4 &trans_mat, const std::array<vec3, 4> &vertices,
     tri2->do_transform(trans_mat);
     return std::make_pair(tri1, tri2);
 }
-
-Cube::Cube(sptr<MaterialBase> material_) : PrimitiveBase(material_) {}
 
 void Cube::make_geos(const mat4 &trans_mat) {
     geos.clear();

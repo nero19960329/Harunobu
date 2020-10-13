@@ -293,20 +293,23 @@ MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
         CHECK_ANY_SUBNODE(node, {"ref"});
         CHECK_ATTR(node, "type");
 
-        auto trans_node = node->first_node("transform");
-        CHECK_ATTR_VALUE(trans_node, "name", "toWorld");
-        CHECK_ANY_SUBNODE(trans_node, {"matrix"});
-
-        auto trans_mat_node = trans_node->first_node("matrix");
-        CHECK_ATTR(trans_mat_node, "value");
-        auto trans_mat = load_mat4(trans_mat_node->first_attribute("value"));
-
         auto ref_node = node->first_node("ref");
         CHECK_ATTR(ref_node, "id");
         std::string ref_mate_id = ref_node->first_attribute("id")->value();
         HARUNOBU_CHECK(materials.find(ref_mate_id) != materials.end(),
                        "Material '{}' is not mentioned before!", ref_mate_id);
         auto material = materials[ref_mate_id];
+
+        auto trans_node = node->first_node("transform");
+        CHECK_ATTR_VALUE(trans_node, "name", "toWorld");
+
+        ParamSet param_set;
+        auto trans_mat_node = trans_node->first_node("matrix");
+        if (trans_mat_node != nullptr) {
+            CHECK_ATTR(trans_mat_node, "value");
+            auto trans_mat = load_mat4(trans_mat_node->first_attribute("value"));
+            param_set.add("transform", trans_mat);
+        }
 
         auto emitter_node = node->first_node("emitter");
         vec3 emit_radiance(0, 0, 0);
@@ -320,7 +323,7 @@ MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
         }
 
         std::string prim_name = node->first_attribute("type")->value();
-        auto prim = PrimitiveBase::factory(prim_name, material, trans_mat);
+        auto prim = PrimitiveBase::factory(prim_name, material, param_set);
         prim->emit_radiance = emit_radiance;
         prim->log_current_status();
 

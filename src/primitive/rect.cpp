@@ -5,6 +5,16 @@ HARUNOBU_NAMESPACE_BEGIN
 
 Rect::Rect(sptr<MaterialBase> material_) : PrimitiveBase(material_) {}
 
+void Rect::init(ParamSet &param_set) {
+    auto trans_mat = param_set.get<mat4>("transform", mat4(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1));
+    make_geos(trans_mat);
+    make_area();
+}
+
 void Rect::make_geos(const mat4 &trans_mat) {
     geos.clear();
     sptr<Tri> tri1 = std::make_shared<Tri>(
