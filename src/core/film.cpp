@@ -15,8 +15,8 @@ void Film::add_sample(const cv::Vec3f &bgr, real i, real j) {
     y_min = std::max(0, y_min);
     x_max = std::min(x_max, width);
     y_max = std::min(y_max, height);
-    for (int x = x_min; x < x_max; ++x) {
-        for (int y = y_min; y < y_max; ++y) {
+    for (int y = y_min; y < y_max; ++y) {
+        for (int x = x_min; x < x_max; ++x) {
             real recon_weight = rfilter->eval(i - x, j - y);
             image.at<cv::Vec3f>(y, x) += bgr * recon_weight;
             recon_weight_sum.at<float>(y, x) += recon_weight;
@@ -25,8 +25,8 @@ void Film::add_sample(const cv::Vec3f &bgr, real i, real j) {
 }
 
 cv::Mat Film::make_image() {
-    for (int i = 0; i < image.rows; ++i) {
-        for (int j = 0; j < image.cols; ++j) {
+    for (int j = 0; j < image.rows; ++j) {
+        for (int i = 0; i < image.cols; ++i) {
             image.at<cv::Vec3f>(j, i) /= recon_weight_sum.at<float>(j, i);
         }
     }

@@ -13,11 +13,11 @@ cv::Mat DirectIllumination::integrate() {
     cv::Mat raw_image(film->height, film->width, CV_32FC3, CV_RGB(0., 0., 0.));
 
 #pragma omp parallel for schedule(dynamic)
-    for (int i = 0; i < raw_image.rows; ++i) {
-        if (i % 100 == 0) {
-            HARUNOBU_INFO("Rendering row {} ...", i);
+    for (int j = 0; j < raw_image.rows; ++j) {
+        if (j % 100 == 0) {
+            HARUNOBU_INFO("Rendering row {} ...", j);
         }
-        for (int j = 0; j < raw_image.cols; ++j) {
+        for (int i = 0; i < raw_image.cols; ++i) {
             int sample_count = sampler->sample_count;
             for (int k = 0; k < sample_count; ++k) {
                 auto ij = sampler->sample_screen_coor(i, j);

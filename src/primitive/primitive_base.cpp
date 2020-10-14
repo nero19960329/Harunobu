@@ -1,6 +1,7 @@
 #include <harunobu/primitive/cube.h>
 #include <harunobu/primitive/primitive_base.h>
 #include <harunobu/primitive/rect.h>
+#include <harunobu/primitive/sphere.h>
 
 HARUNOBU_NAMESPACE_BEGIN
 
@@ -16,6 +17,10 @@ sptr<PrimitiveBase> PrimitiveBase::factory(std::string name,
         return prim;
     } else if (name == "cube") {
         auto prim = std::make_shared<Cube>(material);
+        prim->init(param_set);
+        return prim;
+    } else if (name == "sphere") {
+        auto prim = std::make_shared<Sphere>(material);
         prim->init(param_set);
         return prim;
     } else {

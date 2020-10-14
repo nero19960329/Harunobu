@@ -23,10 +23,9 @@ public:
 
     virtual void log_current_status() const = 0;
 
-    static sptr<PrimitiveBase> factory(std::string name,
-                                       sptr<MaterialBase> material,
-                                       ParamSet &param_set);
-    
+    static sptr<PrimitiveBase>
+    factory(std::string name, sptr<MaterialBase> material, ParamSet &param_set);
+
     virtual void init(ParamSet &param_set) = 0;
     virtual vec3 random_sample() = 0;
 

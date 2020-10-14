@@ -93,6 +93,47 @@ inline vec3 load_vec3(rapidxml::xml_attribute<> *vec_attr) {
     return vec;
 }
 
+template <typename T>
+void load_param(rapidxml::xml_node<> *node, ParamSet &param_set,
+                std::vector<std::string> node_names) {
+    for (const auto &name : node_names) {
+        for (auto subnode = node->first_node(name.c_str()); subnode != nullptr;
+             subnode = subnode->next_sibling(name.c_str())) {
+            CHECK_ATTR(subnode, "name");
+            auto attr_name = subnode->first_attribute("name")->value();
+            if (std::is_same<T, int>::value) {
+                CHECK_ATTR(subnode, "value");
+                param_set.add(attr_name,
+                              atoi(subnode->first_attribute("value")->value()));
+            } else if (std::is_same<T, real>::value) {
+                CHECK_ATTR(subnode, "value");
+                param_set.add(attr_name,
+                              atof(subnode->first_attribute("value")->value()));
+            } else if (std::is_same<T, vec3>::value) {
+                if (subnode->first_attribute("value") != nullptr) {
+                    param_set.add(attr_name,
+                                  load_vec3(subnode->first_attribute("value")));
+                } else if (subnode->first_attribute("x") != nullptr) {
+                    CHECK_ATTR(subnode, "y");
+                    CHECK_ATTR(subnode, "z");
+                    param_set.add(
+                        attr_name,
+                        vec3(atof(subnode->first_attribute("x")->value()),
+                             atof(subnode->first_attribute("y")->value()),
+                             atof(subnode->first_attribute("z")->value())));
+                } else {
+                    HARUNOBU_CHECK(false, "Unsupported node type {}.",
+                                   attr_name);
+                }
+            } else if (std::is_same<T, mat4>::value) {
+                CHECK_ATTR(subnode, "value");
+                param_set.add(attr_name,
+                              load_mat4(subnode->first_attribute("value")));
+            }
+        }
+    }
+}
+
 //============================ Class functions ============================
 
 sptr<Scene> MitsubaReader::load(std::string scene_file) {
@@ -280,6 +321,20 @@ MitsubaReader::load_materials(rapidxml::xml_node<> *scene_node) {
     return materials;
 }
 
+void load_object_param(rapidxml::xml_node<> *shape_node, ParamSet &param_set) {
+    auto trans_node = shape_node->first_node("transform");
+    if (trans_node != nullptr) {
+        CHECK_ATTR_VALUE(trans_node, "name", "toWorld");
+        auto trans_mat_node = trans_node->first_node("matrix");
+        CHECK_ATTR(trans_mat_node, "value");
+        auto trans_mat = load_mat4(trans_mat_node->first_attribute("value"));
+        param_set.add("transform", trans_mat);
+    }
+
+    load_param<real>(shape_node, param_set, {"float"});
+    load_param<vec3>(shape_node, param_set, {"point"});
+}
+
 std::pair<sptr<ObjectsBase>, sptr<ObjectsBase>>
 MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
     HARUNOBU_DEBUG("Loading objects & lights ...");
@@ -289,7 +344,6 @@ MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
 
     for (auto node = scene_node->first_node("shape"); node != nullptr;
          node = node->next_sibling("shape")) {
-        CHECK_ANY_SUBNODE(node, {"transform"});
         CHECK_ANY_SUBNODE(node, {"ref"});
         CHECK_ATTR(node, "type");
 
@@ -300,16 +354,8 @@ MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
                        "Material '{}' is not mentioned before!", ref_mate_id);
         auto material = materials[ref_mate_id];
 
-        auto trans_node = node->first_node("transform");
-        CHECK_ATTR_VALUE(trans_node, "name", "toWorld");
-
         ParamSet param_set;
-        auto trans_mat_node = trans_node->first_node("matrix");
-        if (trans_mat_node != nullptr) {
-            CHECK_ATTR(trans_mat_node, "value");
-            auto trans_mat = load_mat4(trans_mat_node->first_attribute("value"));
-            param_set.add("transform", trans_mat);
-        }
+        load_object_param(node, param_set);
 
         auto emitter_node = node->first_node("emitter");
         vec3 emit_radiance(0, 0, 0);

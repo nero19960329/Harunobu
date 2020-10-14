@@ -29,9 +29,9 @@ void ImagePipeline::clamp(cv::Mat &image, float min_value, float max_value) {
     HARUNOBU_ASSERT(image.type() == CV_32FC3,
                     "Only float32 image could perform clamp!");
 
-    for (int i = 0; i < image.rows; ++i) {
-        for (int j = 0; j < image.cols; ++j) {
-            auto &rgb = image.at<cv::Vec3f>(i, j);
+    for (int j = 0; j < image.rows; ++j) {
+        for (int i = 0; i < image.cols; ++i) {
+            auto &rgb = image.at<cv::Vec3f>(j, i);
             rgb[0] = std::min(std::max(rgb[0], min_value), max_value);
             rgb[1] = std::min(std::max(rgb[1], min_value), max_value);
             rgb[2] = std::min(std::max(rgb[2], min_value), max_value);
@@ -40,12 +40,12 @@ void ImagePipeline::clamp(cv::Mat &image, float min_value, float max_value) {
 }
 
 void ImagePipeline::gamma_correction(cv::Mat &image, real gamma) {
-    HARUNOBU_ASSERT(image.type() == CV_8UC3,
-                    "Only uint8 image could perform gamma corretion!");
+    HARUNOBU_ASSERT(image.type() == CV_32FC3,
+                    "Only float32 image could perform gamma corretion!");
 
 #pragma omp parallel for schedule(dynamic)
-    for (int i = 0; i < image.rows; ++i) {
-        for (int j = 0; j < image.cols; ++j) {
+    for (int j = 0; j < image.rows; ++j) {
+        for (int i = 0; i < image.cols; ++i) {
             image.at<cv::Vec3f>(j, i)[0] =
                 pow(image.at<cv::Vec3f>(j, i)[0], 1.0 / gamma);
             image.at<cv::Vec3f>(j, i)[1] =

@@ -5,11 +5,8 @@ HARUNOBU_NAMESPACE_BEGIN
 Cube::Cube(sptr<MaterialBase> material_) : PrimitiveBase(material_) {}
 
 void Cube::init(ParamSet &param_set) {
-    auto trans_mat = param_set.get<mat4>("transform", mat4(
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1));
+    auto trans_mat = param_set.get<mat4>(
+        "transform", mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
     make_geos(trans_mat);
     make_area();
 }

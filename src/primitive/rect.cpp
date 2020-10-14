@@ -6,11 +6,8 @@ HARUNOBU_NAMESPACE_BEGIN
 Rect::Rect(sptr<MaterialBase> material_) : PrimitiveBase(material_) {}
 
 void Rect::init(ParamSet &param_set) {
-    auto trans_mat = param_set.get<mat4>("transform", mat4(
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1));
+    auto trans_mat = param_set.get<mat4>(
+        "transform", mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
     make_geos(trans_mat);
     make_area();
 }
