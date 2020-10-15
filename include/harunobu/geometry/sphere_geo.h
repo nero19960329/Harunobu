@@ -18,7 +18,7 @@ public:
     virtual void do_transform(const mat4 &trans_mat) override;
     virtual sptr<Intersect> ray_intersect(const Ray &ray,
                                           bool &is_intersect) override;
-    virtual sptr<SampleInfo> random_sample() override;
+    virtual sptr<SampleInfo> random_sample() const override;
 
     virtual void log_current_status() const override;
 }; // class SphereGeo

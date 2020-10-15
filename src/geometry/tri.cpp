@@ -49,7 +49,7 @@ sptr<Intersect> Tri::ray_intersect(const Ray &ray, bool &is_intersect) {
     return intersect;
 }
 
-vec3 Tri::get_barycentric_coordinate(const vec3 &pos) {
+vec3 Tri::get_barycentric_coordinate(const vec3 &pos) const {
     // P = A + u * (C - A) + v * (B - A)
     // P = aA + bB + cC
     vec3 v0 = vertices[2] - vertices[0];
@@ -69,7 +69,7 @@ vec3 Tri::get_barycentric_coordinate(const vec3 &pos) {
     return vec3(1.0 - u - v, v, u);
 }
 
-sptr<SampleInfo> Tri::random_sample() {
+sptr<SampleInfo> Tri::random_sample() const {
     // P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C
     real sqrt_u = std::sqrt(rng.random_real());
     real v = rng.random_real();
@@ -77,6 +77,10 @@ sptr<SampleInfo> Tri::random_sample() {
     sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
     sinfo->pos = vec3(a * vertices[0] + b * vertices[1] + c * vertices[2]);
     sinfo->pdf = 1.0 / area;
+    auto bary = get_barycentric_coordinate(sinfo->pos);
+    sinfo->normal =
+        normals[0] * bary[0] + normals[1] * bary[1] + normals[2] * bary[2];
+    sinfo->prim = parent_prim;
     return sinfo;
 }
 

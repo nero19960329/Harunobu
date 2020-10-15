@@ -28,7 +28,7 @@ public:
 
     virtual void init(ParamSet &param_set) = 0;
     virtual sptr<SampleInfo> random_sample();
-    virtual sptr<SampleInfo> light_sample() { return random_sample(); }
+    virtual sptr<SampleInfo> light_sample(sptr<Intersect> intersect);
 
 protected:
     void make_area();

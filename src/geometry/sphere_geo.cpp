@@ -40,7 +40,7 @@ sptr<Intersect> SphereGeo::ray_intersect(const Ray &ray, bool &is_intersect) {
     return intersect;
 }
 
-sptr<SampleInfo> SphereGeo::random_sample() {
+sptr<SampleInfo> SphereGeo::random_sample() const {
     // x = \sqrt{1 - u^2}cos\theta
     // y = \sqrt{1 - u^2}sin\theta
     // z = u
@@ -52,6 +52,8 @@ sptr<SampleInfo> SphereGeo::random_sample() {
     sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
     sinfo->pos = unit_sample * radius + center;
     sinfo->pdf = 1.0 / area;
+    sinfo->normal = glm::normalize(sinfo->pos - center);
+    sinfo->prim = parent_prim;
     return sinfo;
 }
 
