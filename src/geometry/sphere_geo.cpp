@@ -12,7 +12,8 @@ void SphereGeo::do_transform(const mat4 &trans_mat) {
     HARUNOBU_CHECK(false, "SphereGeo does not support do_transform!");
 }
 
-sptr<Intersect> SphereGeo::ray_intersect(const Ray &ray, bool &is_intersect) {
+sptr<Intersect> SphereGeo::ray_intersect(const Ray &ray,
+                                         bool &is_intersect) const {
     sptr<Intersect> intersect = std::make_shared<Intersect>();
     vec3 sr = ray.pos - center;
     real dot_dir_sr = glm::dot(ray.dir, sr);
@@ -54,6 +55,42 @@ sptr<SampleInfo> SphereGeo::random_sample() const {
     sinfo->pdf = 1.0 / area;
     sinfo->normal = glm::normalize(sinfo->pos - center);
     sinfo->prim = parent_prim;
+    return sinfo;
+}
+
+sptr<SampleInfo> SphereGeo::light_sample(sptr<Intersect> intersect) const {
+    vec3 x = intersect->pos;
+    vec3 w = glm::normalize(center - x);
+    vec3 v = glm::normalize(glm::cross(w, intersect->normal));
+    vec3 u = glm::normalize(glm::cross(v, w));
+    if (glm::any(glm::isnan(v)) || glm::any(glm::isnan(u))) {
+        return random_sample();
+    }
+
+    real t = 1 - std::sqrt(1 - radius * radius / glm::length2(center - x));
+    real theta = std::acos(1 - t * rng.random_real());
+    real phi = rng.random_real(0, 2 * pi());
+    vec3 a = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)) *
+             mat3(u[0], v[0], w[0], u[1], v[1], w[1], u[2], v[2], w[2]);
+    Ray ray(x, glm::normalize(a));
+    ray.pos = ray.step(eps);
+    bool is_intersect;
+    auto light_intersect = ray_intersect(ray, is_intersect);
+    if (!is_intersect) {
+        return random_sample();
+    }
+
+    vec3 x_prime = light_intersect->pos;
+    sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
+    sinfo->pos = x_prime;
+    sinfo->pdf =
+        glm::dot(light_intersect->normal, glm::normalize(x - x_prime)) /
+        (2 * pi() * glm::length2(x - x_prime) * t);
+    sinfo->normal = light_intersect->normal;
+    sinfo->prim = light_intersect->prim;
+    if (sinfo->pdf <= 0.0) {
+        return random_sample();
+    }
     return sinfo;
 }
 

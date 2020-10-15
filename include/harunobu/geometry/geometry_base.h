@@ -43,7 +43,7 @@ public:
 
     virtual void do_transform(const mat4 &trans_mat) = 0;
     virtual sptr<Intersect> ray_intersect(const Ray &ray,
-                                          bool &is_intersect) = 0;
+                                          bool &is_intersect) const = 0;
     virtual sptr<SampleInfo> random_sample() const = 0;
     virtual sptr<SampleInfo> light_sample(sptr<Intersect> intersect) const {
         return random_sample();

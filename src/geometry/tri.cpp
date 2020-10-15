@@ -28,7 +28,7 @@ void Tri::do_transform(const mat4 &trans_mat) {
            0.5;
 }
 
-sptr<Intersect> Tri::ray_intersect(const Ray &ray, bool &is_intersect) {
+sptr<Intersect> Tri::ray_intersect(const Ray &ray, bool &is_intersect) const {
     sptr<Intersect> intersect = std::make_shared<Intersect>();
     real t = glm::dot(vertices[0] - ray.pos, normal_geo) /
              glm::dot(ray.dir, normal_geo);
