@@ -69,12 +69,15 @@ vec3 Tri::get_barycentric_coordinate(const vec3 &pos) {
     return vec3(1.0 - u - v, v, u);
 }
 
-vec3 Tri::random_sample() {
+sptr<SampleInfo> Tri::random_sample() {
     // P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C
     real sqrt_u = std::sqrt(rng.random_real());
     real v = rng.random_real();
     real a = 1. - sqrt_u, b = sqrt_u * (1. - v), c = sqrt_u * v;
-    return a * vertices[0] + b * vertices[1] + c * vertices[2];
+    sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
+    sinfo->pos = vec3(a * vertices[0] + b * vertices[1] + c * vertices[2]);
+    sinfo->pdf = 1.0 / area;
+    return sinfo;
 }
 
 void Tri::log_current_status() const {

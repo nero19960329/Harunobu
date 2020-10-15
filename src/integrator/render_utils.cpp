@@ -8,7 +8,8 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
     vec3 direct_radiance(0, 0, 0);
 
     for (const auto &light : lights) {
-        vec3 x_prime = light->random_sample();
+        auto light_sinfo = light->random_sample();
+        vec3 x_prime = light_sinfo->pos;
         vec3 x = intersect->pos;
         vec3 wi = glm::normalize(x_prime - x);
         vec3 wo = intersect->omega;
@@ -30,12 +31,11 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
         real cos_theta_o = std::max(glm::dot(intersect_light->normal, -wi),
                                     static_cast<real>(0));
 
-        real area = light->area;
         vec3 radiance = light->emit_radiance;
         vec3 f = intersect->prim->material->f(wi, wo);
         real G = cos_theta_i * cos_theta_o / glm::length2(x - x_prime);
 
-        direct_radiance += radiance * area * f * G;
+        direct_radiance += radiance * f * G / light_sinfo->pdf;
     }
     return direct_radiance;
 }

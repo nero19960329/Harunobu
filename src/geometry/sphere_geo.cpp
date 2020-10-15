@@ -40,7 +40,7 @@ sptr<Intersect> SphereGeo::ray_intersect(const Ray &ray, bool &is_intersect) {
     return intersect;
 }
 
-vec3 SphereGeo::random_sample() {
+sptr<SampleInfo> SphereGeo::random_sample() {
     // x = \sqrt{1 - u^2}cos\theta
     // y = \sqrt{1 - u^2}sin\theta
     // z = u
@@ -49,7 +49,10 @@ vec3 SphereGeo::random_sample() {
     real theta = rng.random_real(0, 2 * pi());
     real t = std::sqrt(1 - u * u);
     vec3 unit_sample(t * cos(theta), t * sin(theta), u);
-    return unit_sample * radius + center;
+    sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
+    sinfo->pos = unit_sample * radius + center;
+    sinfo->pdf = 1.0 / area;
+    return sinfo;
 }
 
 void SphereGeo::log_current_status() const {

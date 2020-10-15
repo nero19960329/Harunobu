@@ -22,6 +22,11 @@ public:
     real normal_dot(const vec3 &v) const;
 }; // class Intersect
 
+struct SampleInfo {
+    vec3 pos;
+    real pdf;
+}; // struct SampleInfo
+
 class GeometryBase {
     friend class PrimitiveBase;
 
@@ -38,7 +43,8 @@ public:
     virtual void do_transform(const mat4 &trans_mat) = 0;
     virtual sptr<Intersect> ray_intersect(const Ray &ray,
                                           bool &is_intersect) = 0;
-    virtual vec3 random_sample() = 0;
+    virtual sptr<SampleInfo> random_sample() = 0;
+    virtual sptr<SampleInfo> light_sample() { return random_sample(); }
 
     virtual void log_current_status() const = 0;
 }; // class GeometryBase

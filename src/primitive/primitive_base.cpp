@@ -35,4 +35,11 @@ void PrimitiveBase::make_area() {
     }
 }
 
+sptr<SampleInfo> PrimitiveBase::random_sample() {
+    size_t random_idx = rng.random_idx(0, geos.size() - 1);
+    auto sinfo = geos[random_idx]->random_sample();
+    sinfo->pdf /= geos.size();
+    return sinfo;
+}
+
 HARUNOBU_NAMESPACE_END

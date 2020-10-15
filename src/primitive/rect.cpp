@@ -28,11 +28,6 @@ void Rect::make_geos(const mat4 &trans_mat) {
     geos.push_back(tri2);
 }
 
-vec3 Rect::random_sample() {
-    size_t random_idx = rng.random_idx(0, 1);
-    return geos[random_idx]->random_sample();
-}
-
 void Rect::log_current_status() const {
     HARUNOBU_INFO("Rect");
     material->log_current_status();

@@ -62,11 +62,6 @@ void Cube::make_geos(const mat4 &trans_mat) {
     }
 }
 
-vec3 Cube::random_sample() {
-    HARUNOBU_CHECK(false, "Not implemented.")
-    return vec3();
-}
-
 void Cube::log_current_status() const {
     HARUNOBU_INFO("Cube");
     material->log_current_status();

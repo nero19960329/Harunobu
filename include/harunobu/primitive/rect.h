@@ -11,7 +11,6 @@ public:
     virtual void log_current_status() const override;
 
     virtual void init(ParamSet &param_set) override;
-    virtual vec3 random_sample() override;
 
 private:
     void make_geos(const mat4 &trans_mat);

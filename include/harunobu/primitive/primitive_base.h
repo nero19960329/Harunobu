@@ -27,7 +27,8 @@ public:
     factory(std::string name, sptr<MaterialBase> material, ParamSet &param_set);
 
     virtual void init(ParamSet &param_set) = 0;
-    virtual vec3 random_sample() = 0;
+    virtual sptr<SampleInfo> random_sample();
+    virtual sptr<SampleInfo> light_sample() { return random_sample(); }
 
 protected:
     void make_area();

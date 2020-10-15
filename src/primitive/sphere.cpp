@@ -13,8 +13,6 @@ void Sphere::init(ParamSet &param_set) {
     make_area();
 }
 
-vec3 Sphere::random_sample() { return geos[0]->random_sample(); }
-
 void Sphere::log_current_status() const {
     HARUNOBU_INFO("Sphere");
     material->log_current_status();
