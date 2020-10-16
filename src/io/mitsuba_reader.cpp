@@ -1,7 +1,6 @@
 #include <harunobu/core/param_set.h>
 #include <harunobu/core/utils.h>
 #include <harunobu/io/mitsuba_reader.h>
-#include <harunobu/material/diffuse.h>
 #include <harunobu/sampler/random_sampler.h>
 
 #include <rapidxml/rapidxml_utils.hpp>
@@ -305,16 +304,16 @@ MitsubaReader::load_materials(rapidxml::xml_node<> *scene_node) {
             is_two_sided = true;
         }
 
-        CHECK_ATTR_VALUE(bsdf_node, "type", "diffuse");
-        CHECK_ANY_SUBNODE(bsdf_node, {"rgb"});
-        auto rgb_node = bsdf_node->first_node("rgb");
-        sptr<MaterialBase> material = std::make_shared<Diffuse>();
-        if (rgb_node != nullptr) {
-            CHECK_ATTR_VALUE(rgb_node, "name", "reflectance");
-            material->name = id;
-            material->rgb = load_vec3(rgb_node->first_attribute("value"));
-            material->is_two_sided = is_two_sided;
-        }
+        CHECK_ATTR(bsdf_node, "type");
+        ParamSet param_set;
+        load_param<vec3>(bsdf_node, param_set, {"rgb"});
+        load_param<real>(bsdf_node, param_set, {"float"});
+        load_param<std::string>(bsdf_node, param_set, {"string"});
+        param_set.add("is_two_sided", is_two_sided);
+        param_set.add("id", id);
+
+        std::string material_name = bsdf_node->first_attribute("type")->value();
+        sptr<MaterialBase> material = MaterialBase::factory(material_name, param_set);
         materials[id] = material;
     }
 
