@@ -4,9 +4,9 @@ HARUNOBU_NAMESPACE_BEGIN
 
 vec3 Microfacet::f(const vec3 &wi, const vec3 &wo, const vec3 &normal) const {
     vec3 wh = glm::normalize(wi + wo);
-    real cos_theta_i = std::max(static_cast<real>(0), normal_dot(normal, wi));
-    real cos_theta_o = std::max(static_cast<real>(0), normal_dot(normal, wo));
-    if (cos_theta_i == 0 || cos_theta_o == 0) {
+    real cos_theta_i = normal_dot(normal, wi);
+    real cos_theta_o = normal_dot(normal, wo);
+    if (cos_theta_i <= 0 || cos_theta_o <= 0) {
         return vec3(0, 0, 0);
     }
 

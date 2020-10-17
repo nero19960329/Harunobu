@@ -9,11 +9,11 @@ vec3 RenderUtils::get_direct_radiance_wo_shadow_test(
     vec3 wi = glm::normalize(x_prime - x);
     vec3 wo = intersect->omega;
 
-    real cos_theta_i =
-        std::max(intersect->prim->material->normal_dot(intersect->normal, wi),
-                 static_cast<real>(0));
-    real cos_theta_o =
-        std::max(glm::dot(light_sinfo->normal, -wi), static_cast<real>(0));
+    real cos_theta_i = intersect->prim->material->normal_dot(intersect->normal, wi);
+    real cos_theta_o = glm::dot(light_sinfo->normal, -wi);
+    if (cos_theta_i <= 0.0 || cos_theta_o <= 0.0) {
+        return vec3(0, 0, 0);
+    }
 
     vec3 radiance = light_sinfo->prim->emit_radiance;
     vec3 f = intersect->prim->material->f(wi, wo, intersect->normal);
