@@ -4,8 +4,8 @@ HARUNOBU_NAMESPACE_BEGIN
 
 vec3 Microfacet::f(const vec3 &wi, const vec3 &wo, const vec3 &normal) const {
     vec3 wh = glm::normalize(wi + wo);
-    real cos_theta_i = std::max(static_cast<real>(0), glm::dot(wi, normal));
-    real cos_theta_o = std::max(static_cast<real>(0), glm::dot(wo, normal));
+    real cos_theta_i = std::max(static_cast<real>(0), normal_dot(normal, wi));
+    real cos_theta_o = std::max(static_cast<real>(0), normal_dot(normal, wo));
     if (cos_theta_i == 0 || cos_theta_o == 0) {
         return vec3(0, 0, 0);
     }
@@ -25,7 +25,8 @@ real Microfacet::G(const vec3 &wo, const vec3 &wi, const vec3 &normal) const {
 
 vec3 Microfacet::fresnel(const vec3 &wo, const vec3 &wh) const {
     real cos_theta = glm::dot(wo, wh);
-    HARUNOBU_CHECK(cos_theta >= 0. && cos_theta <= 1., "cos_theta invalid at fresnel!");
+    HARUNOBU_CHECK(cos_theta >= 0. && cos_theta <= 1.,
+                   "cos_theta invalid at fresnel!");
     real cos2_theta = cos_theta * cos_theta;
     real sin2_theta = 1. - cos2_theta;
     vec3 eta2 = eta * eta;
@@ -35,8 +36,8 @@ vec3 Microfacet::fresnel(const vec3 &wo, const vec3 &wh) const {
     vec3 a2_plus_b2 = glm::sqrt(t * t + static_cast<real>(4.) * eta2 * k2);
     vec3 a = glm::sqrt(static_cast<real>(.5) * (a2_plus_b2 + t));
     vec3 a_cos_2 = static_cast<real>(2.) * a * cos_theta;
-    vec3 Rs2 =
-        (a2_plus_b2 + cos2_theta - a_cos_2) / (a2_plus_b2 + cos2_theta + a_cos_2);
+    vec3 Rs2 = (a2_plus_b2 + cos2_theta - a_cos_2) /
+               (a2_plus_b2 + cos2_theta + a_cos_2);
     vec3 Rp2 = Rs2 *
                (cos2_theta * a2_plus_b2 + sin2_theta * sin2_theta -
                 a_cos_2 * sin2_theta) /
@@ -49,11 +50,12 @@ void Microfacet::log_current_status() const {
     HARUNOBU_INFO("Microfacet");
     HARUNOBU_INFO("eta = {}", glm::to_string(eta));
     HARUNOBU_INFO("k = {}", glm::to_string(k));
-    HARUNOBU_INFO("specular_reflectance = {}", glm::to_string(specular_reflectance));
+    HARUNOBU_INFO("specular_reflectance = {}",
+                  glm::to_string(specular_reflectance));
 }
 
 real Beckmann::D(const vec3 &wh, const vec3 &normal) const {
-    real cos_theta = glm::dot(wh, normal);
+    real cos_theta = normal_dot(normal, wh);
     HARUNOBU_CHECK(cos_theta > 0.0, "Error computing D at beckmann!");
     real cos2_theta = cos_theta * cos_theta;
     real tan2_theta = (1. - cos2_theta) / cos2_theta;
@@ -64,7 +66,7 @@ real Beckmann::D(const vec3 &wh, const vec3 &normal) const {
 }
 
 real Beckmann::Lambda(const vec3 &w, const vec3 &normal) const {
-    real cos_theta = glm::dot(w, normal);
+    real cos_theta = normal_dot(normal, w);
     HARUNOBU_CHECK(cos_theta > 0.0, "Error computing Lambda at beckmann!");
     real tan_theta = std::sqrt(1.0 - cos_theta * cos_theta) / cos_theta;
     real a = 1.0 / (alpha * tan_theta);

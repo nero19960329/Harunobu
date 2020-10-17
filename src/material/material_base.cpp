@@ -10,7 +10,16 @@ void MaterialBase::log_current_status() const {
     HARUNOBU_INFO("rgb = {}", glm::to_string(rgb));
 }
 
-sptr<MaterialBase> MaterialBase::factory(std::string name, ParamSet &param_set) {
+real MaterialBase::normal_dot(const vec3 &normal, const vec3 &w) const {
+    if (is_two_sided) {
+        return std::abs(glm::dot(normal, w));
+    } else {
+        return glm::dot(normal, w);
+    }
+}
+
+sptr<MaterialBase> MaterialBase::factory(std::string name,
+                                         ParamSet &param_set) {
     if (name == "diffuse") {
         sptr<Diffuse> material = std::make_shared<Diffuse>();
         material->name = param_set.get<std::string>("id", "");
@@ -25,11 +34,13 @@ sptr<MaterialBase> MaterialBase::factory(std::string name, ParamSet &param_set) 
             material->is_two_sided = param_set.get<bool>("is_two_sided", false);
             material->eta = param_set.get<vec3>("eta", vec3(0, 0, 0));
             material->k = param_set.get<vec3>("k", vec3(0, 0, 0));
-            material->specular_reflectance = param_set.get<vec3>("specularReflectance", vec3(1, 1, 1));
+            material->specular_reflectance =
+                param_set.get<vec3>("specularReflectance", vec3(1, 1, 1));
             material->alpha = param_set.get<real>("alpha", 0.01);
             return material;
         } else {
-            HARUNOBU_CHECK(false, "Unsupported microfacet material type '{}!", type);
+            HARUNOBU_CHECK(false, "Unsupported microfacet material type '{}!",
+                           type);
         }
     } else {
         HARUNOBU_CHECK(false, "Unsupported material type '{}'!", name);

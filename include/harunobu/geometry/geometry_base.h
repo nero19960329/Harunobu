@@ -17,9 +17,6 @@ public:
     const PrimitiveBase *prim;
 
     Intersect() {}
-
-    void set_normal(const vec3 &normal_) { normal = normal_; }
-    real normal_dot(const vec3 &v) const;
 }; // class Intersect
 
 struct SampleInfo {

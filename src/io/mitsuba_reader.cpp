@@ -313,7 +313,8 @@ MitsubaReader::load_materials(rapidxml::xml_node<> *scene_node) {
         param_set.add("id", id);
 
         std::string material_name = bsdf_node->first_attribute("type")->value();
-        sptr<MaterialBase> material = MaterialBase::factory(material_name, param_set);
+        sptr<MaterialBase> material =
+            MaterialBase::factory(material_name, param_set);
         materials[id] = material;
     }
 

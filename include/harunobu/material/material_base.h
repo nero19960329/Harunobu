@@ -17,6 +17,7 @@ public:
 
     virtual vec3 f(const vec3 &wi, const vec3 &wo,
                    const vec3 &normal) const = 0;
+    real normal_dot(const vec3 &normal, const vec3 &w) const;
     virtual void log_current_status() const;
 
     static sptr<MaterialBase> factory(std::string name, ParamSet &param_set);
