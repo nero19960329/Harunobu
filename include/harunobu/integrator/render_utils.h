@@ -10,6 +10,10 @@ HARUNOBU_NAMESPACE_BEGIN
 
 class RenderUtils {
 public:
+    static sptr<SampleInfo>
+    light_sample(sptr<Intersect> intersect,
+                 const std::vector<sptr<SampleInfo>> &sinfo_vec);
+
     static vec3
     get_direct_radiance_wo_shadow_test(sptr<Intersect> intersect,
                                        sptr<SampleInfo> light_sinfo);

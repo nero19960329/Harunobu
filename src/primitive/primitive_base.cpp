@@ -43,53 +43,14 @@ sptr<SampleInfo> PrimitiveBase::random_sample() {
     return sinfo;
 }
 
-inline real vec3_max_elem(const vec3 &v) {
-    return std::max(std::max(v.x, v.y), v.z);
-}
-
 sptr<SampleInfo> PrimitiveBase::light_sample(sptr<Intersect> intersect) {
-    if (geos.size() == 1) {
-        return geos[0]->light_sample(intersect);
-    }
-
-    std::vector<real> pdf(geos.size());
-    std::vector<sptr<SampleInfo>> sinfo_vec(geos.size());
-    real sum = 0;
-    for (size_t i = 0; i < geos.size(); ++i) {
+    int n = geos.size();
+    std::vector<sptr<SampleInfo>> sinfo_vec(n);
+    for (size_t i = 0; i < n; ++i) {
         auto sinfo = geos[i]->light_sample(intersect);
         sinfo_vec[i] = sinfo;
-        pdf[i] = vec3_max_elem(
-            RenderUtils::get_direct_radiance_wo_shadow_test(intersect, sinfo));
-        sum += pdf[i];
     }
-
-    if (sum != 0.0) {
-        for (auto &w : pdf) {
-            w /= sum;
-        }
-    } else {
-        real w_avg = 1.0 / pdf.size();
-        for (auto &w : pdf) {
-            w = w_avg;
-        }
-    }
-
-    std::vector<real> cdf(geos.size() + 1);
-    cdf[0] = 0;
-    for (size_t i = 1; i <= pdf.size(); ++i) {
-        cdf[i] = pdf[i - 1] + cdf[i - 1];
-    }
-    real random = rng.random_real();
-    size_t idx;
-    for (idx = 1; idx < cdf.size(); ++idx) {
-        if (random <= cdf[idx]) {
-            break;
-        }
-    }
-
-    auto sinfo = sinfo_vec[idx - 1];
-    sinfo->pdf *= pdf[idx - 1];
-    return sinfo;
+    return RenderUtils::light_sample(intersect, sinfo_vec);
 }
 
 HARUNOBU_NAMESPACE_END
