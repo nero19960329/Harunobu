@@ -25,6 +25,24 @@ struct SampleInfo {
     const PrimitiveBase *prim;
 }; // struct SampleInfo
 
+class LocalInfo {
+public:
+    vec3 wi, wo;
+    bool is_two_sided;
+
+private:
+    mat3 T, T_inv;
+
+public:
+    LocalInfo(const vec3 &wi_world, const vec3 &wo_world,
+              const vec3 &normal_world, bool is_two_sided_);
+
+    vec3 to_world(const vec3 &w) const;
+    vec3 to_local(const vec3 &w) const;
+
+    real normal_dot(const vec3 &w) const;
+}; // class LocalInfo
+
 class GeometryBase {
     friend class PrimitiveBase;
 

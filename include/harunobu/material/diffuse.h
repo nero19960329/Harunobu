@@ -8,8 +8,7 @@ class Diffuse : public MaterialBase {
 public:
     Diffuse() : MaterialBase() {}
 
-    virtual vec3 f(const vec3 &wi, const vec3 &wo,
-                   const vec3 &normal) const override {
+    virtual vec3 f(sptr<LocalInfo> linfo) const override {
         return rgb / static_cast<real>(pi());
     }
 }; // class Diffuse

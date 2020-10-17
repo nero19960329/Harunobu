@@ -10,13 +10,21 @@ void MaterialBase::log_current_status() const {
     HARUNOBU_INFO("rgb = {}", glm::to_string(rgb));
 }
 
-real MaterialBase::normal_dot(const vec3 &normal, const vec3 &w) const {
-    if (is_two_sided) {
-        return std::abs(glm::dot(normal, w));
-    } else {
-        return glm::dot(normal, w);
-    }
+/*vec3 MaterialBase::sample(const vec3 &wo, const vec3 &normal) const {
+    real phi = rng.random_real(0, 2 * pi());
+    real theta = std::acos(std::sqrt(rng.random_real()));
+    vec3 basis(
+        std::cos(phi) * std::sin(theta),
+        std::cos(phi) * std::sin(theta),
+        std::cos(theta)
+    );
 }
+
+real MaterialBase::pdf(const vec3 &wi, const vec3 &wo, const vec3 &normal) const
+{ real cos_theta_i = glm::dot(wi, normal); if (cos_theta_i > 0 && glm::dot(wo,
+normal) > 0) { return cos_theta_i / pi(); } else { return 0.;
+    }
+}*/
 
 sptr<MaterialBase> MaterialBase::factory(std::string name,
                                          ParamSet &param_set) {
