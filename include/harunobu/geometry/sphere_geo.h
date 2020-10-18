@@ -21,8 +21,7 @@ public:
     virtual sptr<SampleInfo> random_sample() const override;
     virtual sptr<SampleInfo>
     light_sample(sptr<Intersect> intersect) const override;
-    virtual real light_sample_pdf(sptr<Intersect> intersect,
-                                  sptr<SampleInfo> sinfo) const override;
+    virtual real light_sample_pdf(const vec3 &x, const vec3 &x_light, const vec3 &n_light) const override;
 
     virtual void log_current_status() const override;
 }; // class SphereGeo

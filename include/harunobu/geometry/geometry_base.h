@@ -60,12 +60,11 @@ public:
     virtual sptr<Intersect> ray_intersect(const Ray &ray,
                                           bool &is_intersect) const = 0;
     virtual sptr<SampleInfo> random_sample() const = 0;
-    virtual real random_sample_pdf(sptr<SampleInfo> sinfo) const {
+    virtual real random_sample_pdf() const {
         return 1.0 / area;
     }
     virtual sptr<SampleInfo> light_sample(sptr<Intersect> intersect) const;
-    virtual real light_sample_pdf(sptr<Intersect> intersect,
-                                  sptr<SampleInfo> sinfo) const;
+    virtual real light_sample_pdf(const vec3 &x, const vec3 &x_light, const vec3 &n_light) const;
 
     virtual void log_current_status() const = 0;
 }; // class GeometryBase

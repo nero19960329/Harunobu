@@ -53,7 +53,7 @@ sptr<SampleInfo> SphereGeo::random_sample() const {
     vec3 unit_sample(t * cos(theta), t * sin(theta), u);
     sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
     sinfo->pos = unit_sample * radius + center;
-    sinfo->pdf = random_sample_pdf(sinfo);
+    sinfo->pdf = random_sample_pdf();
     sinfo->normal = glm::normalize(sinfo->pos - center);
     sinfo->prim = parent_prim;
     return sinfo;
@@ -84,7 +84,7 @@ sptr<SampleInfo> SphereGeo::light_sample(sptr<Intersect> intersect) const {
     vec3 x_prime = light_intersect->pos;
     sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
     sinfo->pos = x_prime;
-    sinfo->pdf = light_sample_pdf(intersect, sinfo);
+    sinfo->pdf = light_sample_pdf(x, x_prime, light_intersect->normal);
     sinfo->normal = light_intersect->normal;
     sinfo->prim = light_intersect->prim;
     if (sinfo->pdf <= 0.0) {
@@ -93,10 +93,9 @@ sptr<SampleInfo> SphereGeo::light_sample(sptr<Intersect> intersect) const {
     return sinfo;
 }
 
-real SphereGeo::light_sample_pdf(sptr<Intersect> intersect,
-                                 sptr<SampleInfo> sinfo) const {
+real SphereGeo::light_sample_pdf(const vec3 &x, const vec3 &x_light, const vec3 &n_light) const {
     real t = 1 - safe_sqrt(1 - radius * radius /
-                                   glm::length2(center - intersect->pos));
+                                   glm::length2(center - x));
     return 1.0 / (2 * pi() * t);
 }
 

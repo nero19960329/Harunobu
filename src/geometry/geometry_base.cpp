@@ -28,18 +28,15 @@ real LocalInfo::normal_dot(const vec3 &w) const {
 
 sptr<SampleInfo> GeometryBase::light_sample(sptr<Intersect> intersect) const {
     auto sinfo = random_sample();
-    sinfo->pdf = light_sample_pdf(intersect, sinfo);
+    sinfo->pdf = light_sample_pdf(intersect->pos, sinfo->pos, sinfo->normal);
     return sinfo;
 }
 
-real GeometryBase::light_sample_pdf(sptr<Intersect> intersect,
-                                    sptr<SampleInfo> sinfo) const {
-    vec3 x = intersect->pos;
-    vec3 x_prime = sinfo->pos;
+real GeometryBase::light_sample_pdf(const vec3 &x, const vec3 &x_light, const vec3 &n_light) const {
     real abs_cos_theta_o =
-        std::abs(glm::dot(sinfo->normal, glm::normalize(x - x_prime)));
+        std::abs(glm::dot(n_light, glm::normalize(x - x_light)));
     if (abs_cos_theta_o > 0.0) {
-        return random_sample_pdf(sinfo) * glm::length2(x - x_prime) /
+        return random_sample_pdf() * glm::length2(x - x_light) /
                abs_cos_theta_o;
     } else {
         return 0.0;
