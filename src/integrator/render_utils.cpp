@@ -6,9 +6,7 @@ inline real vec3_max_elem(const vec3 &v) {
     return std::max(std::max(v.x, v.y), v.z);
 }
 
-inline real power_heuristic(real a, real b) {
-    return a * a / (a * a + b * b);
-}
+inline real power_heuristic(real a, real b) { return a * a / (a * a + b * b); }
 
 sptr<SampleInfo>
 RenderUtils::light_sample(sptr<Intersect> intersect,
@@ -115,12 +113,13 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
                           glm::length(x_prime - x)) < eps) {
         light_radiance = get_direct_radiance_light_sampling(
             intersect, light_sinfo, pdf_light);
-            
+
         sptr<LocalInfo> linfo = std::make_shared<LocalInfo>(
-            wi_light, wo, intersect->normal, intersect->prim->material->is_two_sided);
+            wi_light, wo, intersect->normal,
+            intersect->prim->material->is_two_sided);
         pdf_bsdf = intersect->prim->material->pdf(linfo);
 
-        //light_radiance *= power_heuristic(pdf_light, pdf_bsdf);
+        light_radiance *= power_heuristic(pdf_light, pdf_bsdf);
     }
 
     // bsdf sampling
@@ -137,7 +136,8 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
     vec3 bsdf_radiance(0, 0, 0);
     real cos_theta_i =
         std::max(linfo->normal_dot(linfo->wi), static_cast<real>(0.));
-    if (is_intersect_light) {
+    if (is_intersect_light &&
+        glm::length(intersect_light->prim->emit_radiance) > 0.0) {
         vec3 emit_radiance = intersect_light->prim->emit_radiance;
         if (glm::dot(intersect_light->normal, -wi_bsdf) <= 0.0) {
             bsdf_radiance = vec3(0, 0, 0);
@@ -146,9 +146,15 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
                             intersect->prim->material->f(linfo) * cos_theta_i /
                             pdf_bsdf;
         }
+        
+        pdf_light = intersect_light->geo->light_sample_pdf(x, intersect_light->pos,
+                                                     intersect_light->normal);
+        pdf_light /= lights.size();
+        pdf_light /= intersect->prim->geos.size();
+        bsdf_radiance *= power_heuristic(pdf_bsdf, pdf_light);
     }
-    
-    direct_radiance = light_radiance * power_heuristic(pdf_light, pdf_bsdf) + bsdf_radiance * power_heuristic(pdf_bsdf, pdf_light);
+
+    direct_radiance = light_radiance + bsdf_radiance;
     return direct_radiance;
 }
 

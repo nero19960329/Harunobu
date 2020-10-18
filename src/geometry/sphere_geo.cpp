@@ -36,6 +36,7 @@ sptr<Intersect> SphereGeo::ray_intersect(const Ray &ray,
     }
     intersect->pos = ray.step(intersect->ray_step);
     intersect->prim = parent_prim;
+    intersect->geo = this;
     intersect->normal = glm::normalize(intersect->pos - center);
     intersect->omega = -ray.dir;
     is_intersect = true;
@@ -93,9 +94,9 @@ sptr<SampleInfo> SphereGeo::light_sample(sptr<Intersect> intersect) const {
     return sinfo;
 }
 
-real SphereGeo::light_sample_pdf(const vec3 &x, const vec3 &x_light, const vec3 &n_light) const {
-    real t = 1 - safe_sqrt(1 - radius * radius /
-                                   glm::length2(center - x));
+real SphereGeo::light_sample_pdf(const vec3 &x, const vec3 &x_light,
+                                 const vec3 &n_light) const {
+    real t = 1 - safe_sqrt(1 - radius * radius / glm::length2(center - x));
     return 1.0 / (2 * pi() * t);
 }
 
