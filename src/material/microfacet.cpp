@@ -1,3 +1,4 @@
+#include <harunobu/core/utils.h>
 #include <harunobu/material/microfacet.h>
 
 HARUNOBU_NAMESPACE_BEGIN
@@ -14,8 +15,28 @@ vec3 Microfacet::f(sptr<LocalInfo> linfo) const {
            specular_reflectance / (4 * cos_theta_i * cos_theta_o);
 }
 
+void Microfacet::sample(sptr<LocalInfo> linfo) const {
+    vec3 wh = sample_wh(linfo);
+    linfo->wi = reflect(linfo->wo, wh);
+}
+
+real Microfacet::pdf(sptr<LocalInfo> linfo) const {
+    if (linfo->normal_dot(linfo->wi) < 0 || linfo->normal_dot(linfo->wo) < 0) {
+        return 0;
+    }
+    vec3 wh = glm::normalize(linfo->wi + linfo->wo);
+    return D(wh, linfo) * G1(linfo->wo, linfo) *
+           std::max(static_cast<real>(0), glm::dot(linfo->wo, wh)) /
+           (std::abs(linfo->normal_dot(linfo->wo)) * 4 *
+            glm::dot(linfo->wo, wh));
+}
+
 real Microfacet::G(sptr<LocalInfo> linfo) const {
     return 1.0 / (1.0 + Lambda(linfo->wo, linfo) + Lambda(linfo->wi, linfo));
+}
+
+real Microfacet::G1(const vec3 &w, sptr<LocalInfo> linfo) const {
+    return 1.0 / (1.0 + Lambda(w, linfo));
 }
 
 vec3 Microfacet::fresnel(const vec3 &wo, const vec3 &wh) const {
@@ -47,6 +68,14 @@ void Microfacet::log_current_status() const {
     HARUNOBU_INFO("k = {}", glm::to_string(k));
     HARUNOBU_INFO("specular_reflectance = {}",
                   glm::to_string(specular_reflectance));
+}
+
+vec3 Beckmann::sample_wh(sptr<LocalInfo> linfo) const {
+    real u = rng.random_real(), phi = rng.random_real(0, 2 * pi());
+    real tan2_theta = -alpha * alpha * std::log(u);
+    real cos_theta = 1 / std::sqrt(1 + tan2_theta);
+    real sin_theta = std::sqrt(1. - cos_theta * cos_theta);
+    return vec3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
 }
 
 real Beckmann::D(const vec3 &wh, sptr<LocalInfo> linfo) const {

@@ -10,21 +10,22 @@ void MaterialBase::log_current_status() const {
     HARUNOBU_INFO("rgb = {}", glm::to_string(rgb));
 }
 
-/*vec3 MaterialBase::sample(const vec3 &wo, const vec3 &normal) const {
+void MaterialBase::sample(sptr<LocalInfo> linfo) const {
     real phi = rng.random_real(0, 2 * pi());
     real theta = std::acos(std::sqrt(rng.random_real()));
-    vec3 basis(
-        std::cos(phi) * std::sin(theta),
-        std::cos(phi) * std::sin(theta),
-        std::cos(theta)
-    );
+    vec3 basis(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta),
+               std::cos(theta));
+    linfo->wi = basis;
 }
 
-real MaterialBase::pdf(const vec3 &wi, const vec3 &wo, const vec3 &normal) const
-{ real cos_theta_i = glm::dot(wi, normal); if (cos_theta_i > 0 && glm::dot(wo,
-normal) > 0) { return cos_theta_i / pi(); } else { return 0.;
+real MaterialBase::pdf(sptr<LocalInfo> linfo) const {
+    real cos_theta_i = linfo->normal_dot(linfo->wi);
+    if (cos_theta_i > 0 && linfo->normal_dot(linfo->wo) > 0) {
+        return cos_theta_i / pi();
+    } else {
+        return 0.;
     }
-}*/
+}
 
 sptr<MaterialBase> MaterialBase::factory(std::string name,
                                          ParamSet &param_set) {

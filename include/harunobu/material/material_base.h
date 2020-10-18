@@ -17,8 +17,8 @@ public:
     MaterialBase() : rgb(0, 0, 0), is_two_sided(false) {}
 
     virtual vec3 f(sptr<LocalInfo> linfo) const = 0;
-    // virtual vec3 sample(const vec3 &wo, const vec3 &normal) const;
-    // virtual real pdf(const vec3 &wi, const vec3 &wo, const vec3 &normal) const;
+    virtual void sample(sptr<LocalInfo> linfo) const;
+    virtual real pdf(sptr<LocalInfo> linfo) const;
     virtual void log_current_status() const;
 
     static sptr<MaterialBase> factory(std::string name, ParamSet &param_set);
