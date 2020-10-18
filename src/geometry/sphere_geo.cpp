@@ -1,3 +1,4 @@
+#include <harunobu/core/utils.h>
 #include <harunobu/geometry/sphere_geo.h>
 
 HARUNOBU_NAMESPACE_BEGIN
@@ -23,8 +24,8 @@ sptr<Intersect> SphereGeo::ray_intersect(const Ray &ray,
         return intersect;
     }
 
-    real t1 = -dot_dir_sr - std::sqrt(d);
-    real t2 = -dot_dir_sr + std::sqrt(d);
+    real t1 = -dot_dir_sr - safe_sqrt(d);
+    real t2 = -dot_dir_sr + safe_sqrt(d);
     if (t2 < 0) {
         is_intersect = false;
         return intersect;
@@ -48,11 +49,11 @@ sptr<SampleInfo> SphereGeo::random_sample() const {
     // u \in [-1, 1], \theta \in [0, 2\pi)
     real u = rng.random_real(-1, 1);
     real theta = rng.random_real(0, 2 * pi());
-    real t = std::sqrt(1 - u * u);
+    real t = safe_sqrt(1 - u * u);
     vec3 unit_sample(t * cos(theta), t * sin(theta), u);
     sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
     sinfo->pos = unit_sample * radius + center;
-    sinfo->pdf = 1.0 / area;
+    sinfo->pdf = random_sample_pdf(sinfo);
     sinfo->normal = glm::normalize(sinfo->pos - center);
     sinfo->prim = parent_prim;
     return sinfo;
@@ -64,10 +65,10 @@ sptr<SampleInfo> SphereGeo::light_sample(sptr<Intersect> intersect) const {
     vec3 v = glm::normalize(glm::cross(w, intersect->normal));
     vec3 u = glm::normalize(glm::cross(v, w));
     if (glm::any(glm::isnan(v)) || glm::any(glm::isnan(u))) {
-        return random_sample();
+        return GeometryBase::light_sample(intersect);
     }
 
-    real t = 1 - std::sqrt(1 - radius * radius / glm::length2(center - x));
+    real t = 1 - safe_sqrt(1 - radius * radius / glm::length2(center - x));
     real theta = std::acos(1 - t * rng.random_real());
     real phi = rng.random_real(0, 2 * pi());
     vec3 a = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)) *
@@ -77,21 +78,26 @@ sptr<SampleInfo> SphereGeo::light_sample(sptr<Intersect> intersect) const {
     bool is_intersect;
     auto light_intersect = ray_intersect(ray, is_intersect);
     if (!is_intersect) {
-        return random_sample();
+        return GeometryBase::light_sample(intersect);
     }
 
     vec3 x_prime = light_intersect->pos;
     sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
     sinfo->pos = x_prime;
-    sinfo->pdf =
-        glm::dot(light_intersect->normal, glm::normalize(x - x_prime)) /
-        (2 * pi() * glm::length2(x - x_prime) * t);
+    sinfo->pdf = light_sample_pdf(intersect, sinfo);
     sinfo->normal = light_intersect->normal;
     sinfo->prim = light_intersect->prim;
     if (sinfo->pdf <= 0.0) {
-        return random_sample();
+        return GeometryBase::light_sample(intersect);
     }
     return sinfo;
+}
+
+real SphereGeo::light_sample_pdf(sptr<Intersect> intersect,
+                                 sptr<SampleInfo> sinfo) const {
+    real t = 1 - safe_sqrt(1 - radius * radius /
+                                   glm::length2(center - intersect->pos));
+    return 1.0 / (2 * pi() * t);
 }
 
 void SphereGeo::log_current_status() const {

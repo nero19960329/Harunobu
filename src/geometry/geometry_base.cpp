@@ -26,4 +26,24 @@ real LocalInfo::normal_dot(const vec3 &w) const {
     }
 }
 
+sptr<SampleInfo> GeometryBase::light_sample(sptr<Intersect> intersect) const {
+    auto sinfo = random_sample();
+    sinfo->pdf = light_sample_pdf(intersect, sinfo);
+    return sinfo;
+}
+
+real GeometryBase::light_sample_pdf(sptr<Intersect> intersect,
+                                    sptr<SampleInfo> sinfo) const {
+    vec3 x = intersect->pos;
+    vec3 x_prime = sinfo->pos;
+    real abs_cos_theta_o =
+        std::abs(glm::dot(sinfo->normal, glm::normalize(x - x_prime)));
+    if (abs_cos_theta_o > 0.0) {
+        return random_sample_pdf(sinfo) * glm::length2(x - x_prime) /
+               abs_cos_theta_o;
+    } else {
+        return 0.0;
+    }
+}
+
 HARUNOBU_NAMESPACE_END

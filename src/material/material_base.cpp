@@ -1,3 +1,4 @@
+#include <harunobu/core/utils.h>
 #include <harunobu/material/diffuse.h>
 #include <harunobu/material/material_base.h>
 #include <harunobu/material/microfacet.h>
@@ -12,7 +13,7 @@ void MaterialBase::log_current_status() const {
 
 void MaterialBase::sample(sptr<LocalInfo> linfo) const {
     real phi = rng.random_real(0, 2 * pi());
-    real theta = std::acos(std::sqrt(rng.random_real()));
+    real theta = std::acos(safe_sqrt(rng.random_real()));
     vec3 basis(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta),
                std::cos(theta));
     linfo->wi = basis;

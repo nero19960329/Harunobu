@@ -70,17 +70,14 @@ vec3 RenderUtils::get_direct_radiance_light_sampling(
         wi, wo, intersect->normal, intersect->prim->material->is_two_sided);
     real cos_theta_i = linfo->normal_dot(linfo->wi);
     real cos_theta_o = glm::dot(light_sinfo->normal, -wi);
+    pdf_light = light_sinfo->pdf;
     if (cos_theta_i <= 0.0 || cos_theta_o <= 0.0) {
-        pdf_light = light_sinfo->pdf * glm::length2(x - x_prime) / std::abs(cos_theta_o);
         return vec3(0, 0, 0);
     }
 
     vec3 radiance = light_sinfo->prim->emit_radiance;
     vec3 f = intersect->prim->material->f(linfo);
-    real G = cos_theta_i * cos_theta_o / glm::length2(x - x_prime);
-    pdf_light = light_sinfo->pdf * glm::length2(x - x_prime) / cos_theta_o;
-
-    return radiance * f * G / light_sinfo->pdf;
+    return radiance * f * cos_theta_i / pdf_light;
 }
 
 vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
@@ -112,8 +109,8 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
     if (is_intersect_light &&
         std::abs(1. - glm::length(intersect_light->pos - x) /
                           glm::length(x_prime - x)) < eps) {
-        light_radiance =
-            get_direct_radiance_light_sampling(intersect, light_sinfo, pdf_light);
+        light_radiance = get_direct_radiance_light_sampling(
+            intersect, light_sinfo, pdf_light);
     }
 
     // bsdf sampling
@@ -135,14 +132,18 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
         if (glm::dot(intersect_light->normal, -wi_bsdf) <= 0.0) {
             bsdf_radiance = vec3(0, 0, 0);
         } else {
-            bsdf_radiance = emit_radiance * intersect->prim->material->f(linfo) *
-                            cos_theta_i / pdf_bsdf;
+            bsdf_radiance = emit_radiance *
+                            intersect->prim->material->f(linfo) * cos_theta_i /
+                            pdf_bsdf;
         }
     }
 
-    real weight_light = pdf_light * pdf_light / (pdf_light * pdf_light + pdf_bsdf * pdf_bsdf);
-    real weight_bsdf = pdf_bsdf * pdf_bsdf / (pdf_light * pdf_light + pdf_bsdf * pdf_bsdf);
-    direct_radiance = weight_light * light_radiance + weight_bsdf * bsdf_radiance;
+    real weight_light =
+        pdf_light * pdf_light / (pdf_light * pdf_light + pdf_bsdf * pdf_bsdf);
+    real weight_bsdf =
+        pdf_bsdf * pdf_bsdf / (pdf_light * pdf_light + pdf_bsdf * pdf_bsdf);
+    direct_radiance =
+        weight_light * light_radiance + weight_bsdf * bsdf_radiance;
 
     return direct_radiance;
 }

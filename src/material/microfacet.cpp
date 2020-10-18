@@ -49,8 +49,8 @@ vec3 Microfacet::fresnel(const vec3 &wo, const vec3 &wh) const {
     vec3 k2 = k * k;
 
     vec3 t = eta2 - k2 - sin2_theta;
-    vec3 a2_plus_b2 = glm::sqrt(t * t + static_cast<real>(4.) * eta2 * k2);
-    vec3 a = glm::sqrt(static_cast<real>(.5) * (a2_plus_b2 + t));
+    vec3 a2_plus_b2 = safe_sqrt(t * t + static_cast<real>(4.) * eta2 * k2);
+    vec3 a = safe_sqrt(static_cast<real>(.5) * (a2_plus_b2 + t));
     vec3 a_cos_2 = static_cast<real>(2.) * a * cos_theta;
     vec3 Rs2 = (a2_plus_b2 + cos2_theta - a_cos_2) /
                (a2_plus_b2 + cos2_theta + a_cos_2);
@@ -73,8 +73,8 @@ void Microfacet::log_current_status() const {
 vec3 Beckmann::sample_wh(sptr<LocalInfo> linfo) const {
     real u = rng.random_real(), phi = rng.random_real(0, 2 * pi());
     real tan2_theta = -alpha * alpha * std::log(u);
-    real cos_theta = 1 / std::sqrt(1 + tan2_theta);
-    real sin_theta = std::sqrt(1. - cos_theta * cos_theta);
+    real cos_theta = 1 / safe_sqrt(1 + tan2_theta);
+    real sin_theta = safe_sqrt(1. - cos_theta * cos_theta);
     return vec3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
 }
 
@@ -92,9 +92,9 @@ real Beckmann::D(const vec3 &wh, sptr<LocalInfo> linfo) const {
 real Beckmann::Lambda(const vec3 &w, sptr<LocalInfo> linfo) const {
     real cos_theta = linfo->normal_dot(w);
     HARUNOBU_CHECK(cos_theta > 0.0, "Error computing Lambda at beckmann!");
-    real tan_theta = std::sqrt(1.0 - cos_theta * cos_theta) / cos_theta;
+    real tan_theta = safe_sqrt(1.0 - cos_theta * cos_theta) / cos_theta;
     real a = 1.0 / (alpha * tan_theta);
-    return .5 * (std::erf(a) - 1 + std::exp(-a * a) / (a * std::sqrt(pi())));
+    return .5 * (std::erf(a) - 1 + std::exp(-a * a) / (a * safe_sqrt(pi())));
 }
 
 void Beckmann::log_current_status() const {

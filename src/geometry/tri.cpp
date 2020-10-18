@@ -71,7 +71,7 @@ vec3 Tri::get_barycentric_coordinate(const vec3 &pos) const {
 
 sptr<SampleInfo> Tri::random_sample() const {
     // P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C
-    real sqrt_u = std::sqrt(rng.random_real());
+    real sqrt_u = safe_sqrt(rng.random_real());
     real v = rng.random_real();
     real a = 1. - sqrt_u, b = sqrt_u * (1. - v), c = sqrt_u * v;
     sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
