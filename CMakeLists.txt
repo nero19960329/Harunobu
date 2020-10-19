@@ -11,7 +11,7 @@ set (CMAKE_CXX_STANDARD 17)
 # Libraries
 find_package(GLM REQUIRED)
 find_package(RapidXML REQUIRED)
-find_package(spdlog REQUIRED)
+find_package(Spdlog REQUIRED)
 set(OpenCV_DIR ${PROJECT_SOURCE_DIR}/include/thirdparty/opencv/lib/cmake/opencv4)
 find_package(OpenCV REQUIRED)
 if (CMAKE_BUILD_TYPE MATCHES "Release")
