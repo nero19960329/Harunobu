@@ -5,6 +5,7 @@
 
 #include <harunobu/core/common.h>
 #include <harunobu/core/param_set.h>
+#include <harunobu/core/pmf.h>
 #include <harunobu/geometry/geometry_base.h>
 #include <harunobu/material/material_base.h>
 
@@ -15,6 +16,7 @@ public:
     sptr<MaterialBase> material;
     vec3 emit_radiance;
     std::vector<sptr<GeometryBase>> geos;
+    size_t idx;
 
     real area;
 
@@ -28,7 +30,7 @@ public:
 
     virtual void init(ParamSet &param_set) = 0;
     virtual sptr<SampleInfo> random_sample();
-    virtual sptr<SampleInfo> light_sample(sptr<Intersect> intersect);
+    virtual sptr<SampleInfo> light_sample(sptr<Intersect> intersect, PMF &pmf);
 
 protected:
     void make_area();

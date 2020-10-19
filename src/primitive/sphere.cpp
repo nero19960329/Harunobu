@@ -9,7 +9,9 @@ void Sphere::init(ParamSet &param_set) {
     geos.clear();
     vec3 center = param_set.get<vec3>("center", vec3(0, 0, 0));
     real radius = param_set.get<real>("radius", 1.);
-    geos.push_back(std::make_shared<SphereGeo>(this, center, radius));
+    auto sphere_geo = std::make_shared<SphereGeo>(this, center, radius);
+    sphere_geo->idx = 0;
+    geos.push_back(sphere_geo);
     make_area();
 }
 

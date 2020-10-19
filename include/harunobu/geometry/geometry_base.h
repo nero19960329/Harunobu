@@ -50,6 +50,7 @@ class GeometryBase {
 
 public:
     const PrimitiveBase *parent_prim;
+    size_t idx;
 
 protected:
     real area;

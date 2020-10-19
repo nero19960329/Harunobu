@@ -43,14 +43,15 @@ sptr<SampleInfo> PrimitiveBase::random_sample() {
     return sinfo;
 }
 
-sptr<SampleInfo> PrimitiveBase::light_sample(sptr<Intersect> intersect) {
+sptr<SampleInfo> PrimitiveBase::light_sample(sptr<Intersect> intersect,
+                                             PMF &pmf) {
     int n = geos.size();
     std::vector<sptr<SampleInfo>> sinfo_vec(n);
     for (size_t i = 0; i < n; ++i) {
         auto sinfo = geos[i]->light_sample(intersect);
         sinfo_vec[i] = sinfo;
     }
-    return RenderUtils::light_sample(intersect, sinfo_vec);
+    return RenderUtils::light_sample(intersect, sinfo_vec, pmf);
 }
 
 HARUNOBU_NAMESPACE_END

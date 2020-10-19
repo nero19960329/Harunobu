@@ -57,7 +57,9 @@ void Cube::make_geos(const mat4 &trans_mat) {
 
     for (size_t i = 0; i < rects.size(); ++i) {
         auto [tri1, tri2] = make_rect_geos(trans_mat, rects[i], normals[i]);
+        tri1->idx = geos.size();
         geos.push_back(tri1);
+        tri2->idx = geos.size();
         geos.push_back(tri2);
     }
 }

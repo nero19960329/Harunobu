@@ -24,7 +24,9 @@ void Rect::make_geos(const mat4 &trans_mat) {
         std::array<vec3, 3>{vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1)});
     tri1->do_transform(trans_mat);
     tri2->do_transform(trans_mat);
+    tri1->idx = 0;
     geos.push_back(tri1);
+    tri2->idx = 1;
     geos.push_back(tri2);
 }
 
