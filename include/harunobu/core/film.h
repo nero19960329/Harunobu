@@ -8,7 +8,7 @@ HARUNOBU_NAMESPACE_BEGIN
 
 class Film {
 public:
-    int width, height;
+    size_t width, height;
     sptr<RFilterBase> rfilter;
 
 private:
@@ -16,7 +16,7 @@ private:
     sptr<Image<real>> recon_weight_sum;
 
 public:
-    Film(int width_, int height_);
+    Film(size_t width_, size_t height_);
 
     void add_sample(const vec3 &rgb, real i, real j);
     sptr<Image<real>> make_image();

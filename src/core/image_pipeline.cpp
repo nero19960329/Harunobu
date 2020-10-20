@@ -17,8 +17,8 @@ void ImagePipeline::dump_image(sptr<Image<real>> raw_image) {
     
     std::ofstream fout(output_name, std::ios_base::out | std::ios_base::binary);
     fout << "P6\n" << image->width << " " << image->height << std::endl << "255" << std::endl;
-    for (int j = 0; j < image->height; ++j) {
-        for (int i = 0; i < image->width; ++i) {
+    for (size_t j = 0; j < image->height; ++j) {
+        for (size_t i = 0; i < image->width; ++i) {
             fout << (char) (image->at(0, j, i)) << (char) (image->at(1, j, i)) << (char) (image->at(2, j, i));
         }
     }
@@ -34,9 +34,9 @@ void ImagePipeline::log_current_status() const {
 }
 
 void ImagePipeline::clamp(sptr<Image<real>> image, real min_value, real max_value) {
-    for (int i = 0; i < image->width; ++i) {
-        for (int j = 0; j < image->height; ++j) {
-            for (int k = 0; k < image->channel; ++k) {
+    for (size_t i = 0; i < image->width; ++i) {
+        for (size_t j = 0; j < image->height; ++j) {
+            for (size_t k = 0; k < image->channel; ++k) {
                 image->at(k, j, i) = std::min(std::max(image->at(k, j, i), min_value), max_value);
             }
         }
@@ -44,9 +44,9 @@ void ImagePipeline::clamp(sptr<Image<real>> image, real min_value, real max_valu
 }
 
 void ImagePipeline::gamma_correction(sptr<Image<real>> image, real gamma) {
-    for (int i = 0; i < image->width; ++i) {
-        for (int j = 0; j < image->height; ++j) {
-            for (int k = 0; k < image->channel; ++k) {
+    for (size_t i = 0; i < image->width; ++i) {
+        for (size_t j = 0; j < image->height; ++j) {
+            for (size_t k = 0; k < image->channel; ++k) {
                 image->at(k, j, i) = pow(image->at(k, j, i), 1.0 / gamma);
             }
         }
@@ -55,9 +55,9 @@ void ImagePipeline::gamma_correction(sptr<Image<real>> image, real gamma) {
 
 sptr<Image<unsigned char>> ImagePipeline::convert(sptr<Image<real>> image) {
     sptr<Image<unsigned char>> output = std::make_shared<Image<unsigned char>>(std::array<size_t, 3>{ image->channel, image->height, image->width });
-    for (int i = 0; i < image->width; ++i) {
-        for (int j = 0; j < image->height; ++j) {
-            for (int k = 0; k < image->channel; ++k) {
+    for (size_t i = 0; i < image->width; ++i) {
+        for (size_t j = 0; j < image->height; ++j) {
+            for (size_t k = 0; k < image->channel; ++k) {
                 output->at(k, j, i) = static_cast<unsigned char>(std::round(image->at(k, j, i) * 255.0));
             }
         }
