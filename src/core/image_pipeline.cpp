@@ -63,11 +63,13 @@ sptr<Image<unsigned char>> ImagePipeline::convert(sptr<Image<real>> image) {
     return output;
 }
 
-void ImagePipeline::save_image(sptr<Image<unsigned char>> image, std::string output_name) {
+void ImagePipeline::save_image(sptr<Image<unsigned char>> image,
+                               std::string output_name) {
     png::image<png::rgb_pixel> image_png(image->width, image->height);
     for (size_t i = 0; i < image->width; ++i) {
         for (size_t j = 0; j < image->height; ++j) {
-            image_png[j][i] = png::rgb_pixel(image->at(0, j, i), image->at(1, j, i), image->at(2, j, i));
+            image_png[j][i] = png::rgb_pixel(
+                image->at(0, j, i), image->at(1, j, i), image->at(2, j, i));
         }
     }
     image_png.write(output_name);
