@@ -1,8 +1,7 @@
 #pragma once
 
 #include <harunobu/core/common.h>
-
-#include <opencv2/opencv.hpp>
+#include <harunobu/core/image.h>
 
 HARUNOBU_NAMESPACE_BEGIN
 
@@ -15,12 +14,13 @@ public:
 public:
     ImagePipeline() {}
 
-    void dump_image(const cv::Mat &raw_image);
+    void dump_image(sptr<Image<real>> raw_image);
     void log_current_status() const;
 
 private:
-    void clamp(cv::Mat &image, float min_value, float max_value);
-    void gamma_correction(cv::Mat &image, real gamma);
+    void clamp(sptr<Image<real>> image, real min_value, real max_value);
+    void gamma_correction(sptr<Image<real>> image, real gamma);
+    sptr<Image<unsigned char>> convert(sptr<Image<real>> image);
 };
 
 HARUNOBU_NAMESPACE_END

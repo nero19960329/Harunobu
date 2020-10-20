@@ -4,8 +4,6 @@
 #include <harunobu/core/common.h>
 #include <harunobu/io/mitsuba_reader.h>
 
-#include <opencv2/opencv.hpp>
-
 int main(int argc, char *argv[]) {
     harunobu::initialize_env();
 
