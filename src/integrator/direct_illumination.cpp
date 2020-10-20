@@ -10,7 +10,8 @@ DirectIllumination::DirectIllumination(sptr<Scene> scene_, int max_depth_,
       light_sample_num(light_sample_num_) {}
 
 sptr<Image<real>> DirectIllumination::integrate() {
-    auto raw_image = std::make_shared<Image<real>>(std::array<size_t, 3>{ 3, film->height, film->width });
+    auto raw_image = std::make_shared<Image<real>>(
+        std::array<size_t, 3>{3, film->height, film->width});
 
 #pragma omp parallel for schedule(dynamic)
     for (size_t i = 0; i < raw_image->width; ++i) {
@@ -24,9 +25,7 @@ sptr<Image<real>> DirectIllumination::integrate() {
                 auto rgb = integrate_ray(scene->camera->make_ray(
                     ij[0], ij[1], film->height, film->width));
 #pragma omp critical
-{
-                film->add_sample(rgb, ij[0], ij[1]);
-}
+                { film->add_sample(rgb, ij[0], ij[1]); }
             }
         }
     }
