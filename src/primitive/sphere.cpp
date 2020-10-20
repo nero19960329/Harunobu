@@ -12,7 +12,7 @@ void Sphere::init(ParamSet &param_set) {
     auto sphere_geo = std::make_shared<SphereGeo>(this, center, radius);
     sphere_geo->idx = 0;
     geos.push_back(sphere_geo);
-    make_area();
+    PrimitiveBase::init(param_set);
 }
 
 void Sphere::log_current_status() const {
