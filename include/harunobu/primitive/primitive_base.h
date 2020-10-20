@@ -31,7 +31,8 @@ public:
 
     virtual void init(ParamSet &param_set) {
         make_area();
-        light_sampling_weight = param_set.get<real>("light_sampling_weight", 1.);
+        light_sampling_weight =
+            param_set.get<real>("light_sampling_weight", 1.);
     }
     virtual sptr<SampleInfo> random_sample();
     virtual sptr<SampleInfo> light_sample(sptr<Intersect> intersect, PMF &pmf);

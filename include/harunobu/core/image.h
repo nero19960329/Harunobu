@@ -6,8 +6,7 @@
 
 HARUNOBU_NAMESPACE_BEGIN
 
-template <typename T>
-class Image {
+template <typename T> class Image {
 private:
     std::unique_ptr<T[]> data;
 
@@ -15,7 +14,8 @@ public:
     size_t width, height, channel;
 
 public:
-    Image(std::array<size_t, 3> shape): data(new T[shape[0] * shape[1] * shape[2]]) {
+    Image(std::array<size_t, 3> shape)
+        : data(new T[shape[0] * shape[1] * shape[2]]) {
         channel = shape[0];
         height = shape[1];
         width = shape[2];
@@ -23,13 +23,9 @@ public:
         std::fill_n(data.get(), elem_num, 0);
     }
 
-    T& at(int k, int j, int i) {
-        return data.get()[idx(k, j, i)];
-    }
+    T &at(int k, int j, int i) { return data.get()[idx(k, j, i)]; }
 
-    T at(int k, int j, int i) const {
-        return data.get()[idx(k, j, i)];
-    }
+    T at(int k, int j, int i) const { return data.get()[idx(k, j, i)]; }
 
     std::string to_string() {
         std::ostringstream oss;

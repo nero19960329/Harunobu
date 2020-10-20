@@ -3,8 +3,10 @@
 HARUNOBU_NAMESPACE_BEGIN
 
 Film::Film(size_t width_, size_t height_) : width(width_), height(height_) {
-    image = std::make_shared<Image<real>>(std::array<size_t, 3>{ 3, height, width });
-    recon_weight_sum = std::make_shared<Image<real>>(std::array<size_t, 3>{ 1, height, width });
+    image =
+        std::make_shared<Image<real>>(std::array<size_t, 3>{3, height, width});
+    recon_weight_sum =
+        std::make_shared<Image<real>>(std::array<size_t, 3>{1, height, width});
 }
 
 void Film::add_sample(const vec3 &rgb, real i, real j) {
