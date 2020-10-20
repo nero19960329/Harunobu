@@ -12,8 +12,6 @@ set (CMAKE_CXX_STANDARD 17)
 find_package(GLM REQUIRED)
 find_package(RapidXML REQUIRED)
 find_package(Spdlog REQUIRED)
-set(OpenCV_DIR ${PROJECT_SOURCE_DIR}/include/thirdparty/opencv/lib/cmake/opencv4)
-find_package(OpenCV REQUIRED)
 if (CMAKE_BUILD_TYPE MATCHES "Release")
   find_package(OpenMP REQUIRED)
   if (OPENMP_FOUND)
@@ -22,11 +20,6 @@ if (CMAKE_BUILD_TYPE MATCHES "Release")
     set(CMAKE_EXE_LINKER_FLAGS"${CMAKE_EXE_LINKER_FLAGS}${OpenMP_EXE_LINKER_FLAGS}")
   endif()
 endif()
-
-message(STATUS "OpenCV library status:")
-message(STATUS "    version: ${OpenCV_VERSION}")
-message(STATUS "    libraries: ${OpenCV_LIBS}")
-message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
 
 file(GLOB HARUNOBU_SRC
   "src/core/*.cpp"
@@ -45,7 +38,6 @@ target_include_directories(harunobu
     ${GLM_INCLUDE_DIRS}
     ${RapidXML_INCLUDE_DIR}
     ${SPDLOG_INCLUDE_DIR}
-    ${OpenCV_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include)
 
 add_executable(harunobu_bin
@@ -53,14 +45,12 @@ add_executable(harunobu_bin
 )
 target_include_directories(harunobu_bin
   PRIVATE
-    ${OpenCV_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include
 )
 target_link_libraries(harunobu_bin
   PRIVATE
     harunobu
     spdlog::spdlog
-    ${OpenCV_LIBS}
 )
 set_target_properties(harunobu_bin
   PROPERTIES OUTPUT_NAME harunobu)
