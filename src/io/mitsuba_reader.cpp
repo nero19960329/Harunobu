@@ -3,7 +3,7 @@
 #include <harunobu/io/mitsuba_reader.h>
 #include <harunobu/sampler/random_sampler.h>
 
-#include <rapidxml/rapidxml_utils.hpp>
+#include <rapidxml_utils.hpp>
 
 #include <cstring>
 #include <sstream>
