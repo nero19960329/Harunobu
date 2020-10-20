@@ -14,7 +14,7 @@ public:
     DirectIllumination(sptr<Scene> scene_, int max_depth_,
                        int light_sample_num_);
 
-    virtual cv::Mat integrate() override;
+    virtual sptr<Image<real>> integrate() override;
 
 private:
     vec3 integrate_ray(const Ray &ray);

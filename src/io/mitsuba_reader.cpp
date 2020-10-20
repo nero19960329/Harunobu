@@ -3,7 +3,7 @@
 #include <harunobu/io/mitsuba_reader.h>
 #include <harunobu/sampler/random_sampler.h>
 
-#include <rapidxml/rapidxml_utils.hpp>
+#include <rapidxml_utils.hpp>
 
 #include <cstring>
 #include <sstream>
@@ -235,7 +235,6 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
 
     vec3 pos, dir, up;
     real fov;
-    int height, width;
 
     // Load floats
     for (auto node = camera_node->first_node("float"); node != nullptr;
@@ -388,9 +387,9 @@ sptr<ImagePipeline>
 MitsubaReader::load_image_pipeline(rapidxml::xml_node<> *film_node) {
     HARUNOBU_DEBUG("Loading image_pipeline ...");
 
-    std::string file_format;
-    std::string pixel_format;
-    float gamma;
+    std::string file_format = "png";
+    std::string pixel_format = "rgb";
+    float gamma = 2.2;
 
     for (auto node = film_node->first_node("string"); node != nullptr;
          node = node->next_sibling("string")) {
