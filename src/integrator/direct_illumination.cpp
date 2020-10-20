@@ -13,11 +13,11 @@ sptr<Image<real>> DirectIllumination::integrate() {
     auto raw_image = std::make_shared<Image<real>>(std::array<size_t, 3>{ 3, film->height, film->width });
 
 #pragma omp parallel for schedule(dynamic)
-    for (int i = 0; i < raw_image->width; ++i) {
+    for (size_t i = 0; i < raw_image->width; ++i) {
         if (i % 100 == 0) {
             HARUNOBU_INFO("Rendering row {} ...", i);
         }
-        for (int j = 0; j < raw_image->height; ++j) {
+        for (size_t j = 0; j < raw_image->height; ++j) {
             int sample_count = sampler->sample_count;
             for (int k = 0; k < sample_count; ++k) {
                 auto ij = sampler->sample_screen_coor(i, j);

@@ -45,7 +45,7 @@ sptr<SampleInfo> PrimitiveBase::random_sample() {
 
 sptr<SampleInfo> PrimitiveBase::light_sample(sptr<Intersect> intersect,
                                              PMF &pmf) {
-    int n = geos.size();
+    size_t n = geos.size();
     std::vector<sptr<SampleInfo>> sinfo_vec(n);
     for (size_t i = 0; i < n; ++i) {
         auto sinfo = geos[i]->light_sample(intersect);
