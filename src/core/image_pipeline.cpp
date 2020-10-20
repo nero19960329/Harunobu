@@ -1,5 +1,8 @@
 #include <fstream>
+
 #include <harunobu/core/image_pipeline.h>
+
+#include <png.hpp>
 
 HARUNOBU_NAMESPACE_BEGIN
 
@@ -12,21 +15,9 @@ void ImagePipeline::dump_image(sptr<Image<real>> raw_image) {
 
     // perform in uint8
 
-    std::string output_name = file_name + ".ppm";
+    std::string output_name = file_name + "." + file_format;
     HARUNOBU_INFO("Dump into {} ...", output_name);
-
-    std::ofstream fout(output_name, std::ios_base::out | std::ios_base::binary);
-    fout << "P6\n"
-         << image->width << " " << image->height << std::endl
-         << "255" << std::endl;
-    for (size_t j = 0; j < image->height; ++j) {
-        for (size_t i = 0; i < image->width; ++i) {
-            fout << (char)(image->at(0, j, i)) << (char)(image->at(1, j, i))
-                 << (char)(image->at(2, j, i));
-        }
-    }
-    fout.close();
-
+    save_image(image, output_name);
     HARUNOBU_INFO("Dump done.");
 }
 
@@ -70,6 +61,16 @@ sptr<Image<unsigned char>> ImagePipeline::convert(sptr<Image<real>> image) {
         }
     }
     return output;
+}
+
+void ImagePipeline::save_image(sptr<Image<unsigned char>> image, std::string output_name) {
+    png::image<png::rgb_pixel> image_png(image->width, image->height);
+    for (size_t i = 0; i < image->width; ++i) {
+        for (size_t j = 0; j < image->height; ++j) {
+            image_png[j][i] = png::rgb_pixel(image->at(0, j, i), image->at(1, j, i), image->at(2, j, i));
+        }
+    }
+    image_png.write(output_name);
 }
 
 HARUNOBU_NAMESPACE_END

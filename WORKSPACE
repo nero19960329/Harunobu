@@ -23,3 +23,27 @@ http_archive(
     strip_prefix = "rapidxml-1.13",
     url = "https://downloads.sourceforge.net/project/rapidxml/rapidxml/rapidxml%201.13/rapidxml-1.13.zip",
 )
+
+# libpng
+http_archive(
+    name = "libpng",
+    build_file = "@//:external/libpng.BUILD",
+    strip_prefix = "lpng1637",
+    url = "https://download.sourceforge.net/libpng/lpng1637.zip",
+)
+
+# zlib
+http_archive(
+    name = "zlib",
+    build_file = "@//:external/zlib.BUILD",
+    strip_prefix = "zlib-1.2.11",
+    url = "https://downloads.sourceforge.net/project/libpng/zlib/1.2.11/zlib1211.zip",
+)
+
+# pngpp
+http_archive(
+    name = "pngpp",
+    build_file = "@//:external/pngpp.BUILD",
+    strip_prefix = "png++-0.2.10",
+    url = "https://download.savannah.nongnu.org/releases/pngpp/png++-0.2.10.tar.gz",
+)

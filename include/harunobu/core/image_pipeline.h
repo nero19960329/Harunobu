@@ -21,6 +21,7 @@ private:
     void clamp(sptr<Image<real>> image, real min_value, real max_value);
     void gamma_correction(sptr<Image<real>> image, real gamma);
     sptr<Image<unsigned char>> convert(sptr<Image<real>> image);
+    void save_image(sptr<Image<unsigned char>> image, std::string output_name);
 };
 
 HARUNOBU_NAMESPACE_END

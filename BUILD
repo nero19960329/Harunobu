@@ -6,13 +6,13 @@ cc_library(
     copts = [
         "-std=c++17",
         "-D_FLOAT64",
-        "-fopenmp",
     ],
-    linkopts = ["-lgomp"],
     deps = [
         "@glm//:glm",
         "@spdlog//:spdlog",
         "@rapidxml//:rapidxml",
+        "@libpng//:libpng",
+        "@pngpp//:pngpp",
     ]
 )
 
@@ -22,8 +22,6 @@ cc_binary(
     copts = [
         "-std=c++17",
         "-D_FLOAT64",
-        "-fopenmp",
     ],
-    linkopts = ["-lgomp"],
     deps = [":harunobu_lib"]
 )
