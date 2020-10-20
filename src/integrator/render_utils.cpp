@@ -15,8 +15,7 @@ RenderUtils::light_sample(sptr<Intersect> intersect,
     size_t n = sinfo_vec.size();
     std::vector<real> pdf(n);
     for (size_t i = 0; i < n; ++i) {
-        pdf[i] = vec3_max_elem(RenderUtils::get_direct_radiance_light_sampling(
-            intersect, sinfo_vec[i]));
+        pdf[i] = sinfo_vec[i]->prim->light_sampling_weight;
     }
     pmf.build(pdf);
     auto idx = pmf.sample();
