@@ -20,7 +20,3 @@ bazel*
 
 # vscode
 .vscode
-
-# tmp files
-*.png
-*.ppm
