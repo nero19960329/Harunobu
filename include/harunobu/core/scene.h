@@ -19,7 +19,7 @@ public:
 public:
     Scene() {}
 
-    void render();
+    void render(std::string output_path);
 }; // class Scene
 
 HARUNOBU_NAMESPACE_END

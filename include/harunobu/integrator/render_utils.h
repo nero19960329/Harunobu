@@ -18,8 +18,7 @@ public:
     static vec3 get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
                                     sptr<Intersect> intersect,
                                     sptr<ObjectsBase> objects,
-                                    int light_sample_num,
-                                    int bsdf_sample_num);
+                                    int light_sample_num, int bsdf_sample_num);
 }; // class RenderUtils
 
 HARUNOBU_NAMESPACE_END

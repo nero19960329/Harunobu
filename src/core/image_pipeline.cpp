@@ -6,7 +6,8 @@
 
 HARUNOBU_NAMESPACE_BEGIN
 
-void ImagePipeline::dump_image(sptr<Image<real>> raw_image) {
+void ImagePipeline::dump_image(sptr<Image<real>> raw_image,
+                               std::string output_path) {
     // perform in float32
     gamma_correction(raw_image, gamma);
     clamp(raw_image, 0.0f, 1.0f);
@@ -15,9 +16,11 @@ void ImagePipeline::dump_image(sptr<Image<real>> raw_image) {
 
     // perform in uint8
 
-    std::string output_name = file_name + "." + file_format;
-    HARUNOBU_INFO("Dump into {} ...", output_name);
-    save_image(image, output_name);
+    HARUNOBU_INFO("Dump into {} ...", output_path);
+    auto extension = output_path.substr(output_path.size() - 3, 3);
+    HARUNOBU_CHECK(output_path.size() > 3 && extension == "png",
+                   "Invalid extension {}, only png is supported!", extension)
+    save_image(image, output_path);
     HARUNOBU_INFO("Dump done.");
 }
 

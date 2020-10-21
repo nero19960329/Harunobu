@@ -14,7 +14,7 @@ public:
 public:
     ImagePipeline() {}
 
-    void dump_image(sptr<Image<real>> raw_image);
+    void dump_image(sptr<Image<real>> raw_image, std::string output_path);
     void log_current_status() const;
 
 private:
