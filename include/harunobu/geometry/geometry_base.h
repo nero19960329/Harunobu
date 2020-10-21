@@ -7,6 +7,7 @@
 
 HARUNOBU_NAMESPACE_BEGIN
 
+class GeometryBase;
 class PrimitiveBase;
 
 class Intersect {
@@ -15,18 +16,41 @@ public:
     vec3 pos, normal;
     vec3 omega;
     const PrimitiveBase *prim;
+    const GeometryBase *geo;
 
     Intersect() {}
-
-    void set_normal(const vec3 &normal_) { normal = normal_; }
-    real normal_dot(const vec3 &v) const;
 }; // class Intersect
+
+struct SampleInfo {
+    vec3 pos, normal;
+    real pdf;
+    const PrimitiveBase *prim;
+}; // struct SampleInfo
+
+class LocalInfo {
+public:
+    vec3 wi, wo;
+    bool is_two_sided;
+
+private:
+    mat3 T, T_inv;
+
+public:
+    LocalInfo(const vec3 &wi_world, const vec3 &wo_world,
+              const vec3 &normal_world, bool is_two_sided_);
+
+    vec3 to_world(const vec3 &w) const;
+    vec3 to_local(const vec3 &w) const;
+
+    real normal_dot(const vec3 &w) const;
+}; // class LocalInfo
 
 class GeometryBase {
     friend class PrimitiveBase;
 
 public:
     const PrimitiveBase *parent_prim;
+    size_t idx;
 
 protected:
     real area;
@@ -37,8 +61,12 @@ public:
 
     virtual void do_transform(const mat4 &trans_mat) = 0;
     virtual sptr<Intersect> ray_intersect(const Ray &ray,
-                                          bool &is_intersect) = 0;
-    virtual vec3 random_sample() = 0;
+                                          bool &is_intersect) const = 0;
+    virtual sptr<SampleInfo> random_sample() const = 0;
+    virtual real random_sample_pdf() const { return 1.0 / area; }
+    virtual sptr<SampleInfo> light_sample(sptr<Intersect> intersect) const;
+    virtual real light_sample_pdf(const vec3 &x, const vec3 &x_light,
+                                  const vec3 &n_light) const;
 
     virtual void log_current_status() const = 0;
 }; // class GeometryBase

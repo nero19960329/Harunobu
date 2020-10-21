@@ -5,6 +5,13 @@ HARUNOBU_NAMESPACE_BEGIN
 
 Rect::Rect(sptr<MaterialBase> material_) : PrimitiveBase(material_) {}
 
+void Rect::init(ParamSet &param_set) {
+    auto trans_mat = param_set.get<mat4>(
+        "transform", mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
+    make_geos(trans_mat);
+    PrimitiveBase::init(param_set);
+}
+
 void Rect::make_geos(const mat4 &trans_mat) {
     geos.clear();
     sptr<Tri> tri1 = std::make_shared<Tri>(
@@ -17,13 +24,10 @@ void Rect::make_geos(const mat4 &trans_mat) {
         std::array<vec3, 3>{vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1)});
     tri1->do_transform(trans_mat);
     tri2->do_transform(trans_mat);
+    tri1->idx = 0;
     geos.push_back(tri1);
+    tri2->idx = 1;
     geos.push_back(tri2);
-}
-
-vec3 Rect::random_sample() {
-    size_t random_idx = rng.random_idx(0, 1);
-    return geos[random_idx]->random_sample();
 }
 
 void Rect::log_current_status() const {

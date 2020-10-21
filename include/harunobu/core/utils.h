@@ -4,6 +4,18 @@
 
 HARUNOBU_NAMESPACE_BEGIN
 
+inline real safe_sqrt(real a) {
+    return std::sqrt(std::max(a, static_cast<real>(0)));
+}
+
+inline vec3 safe_sqrt(vec3 a) {
+    return vec3(safe_sqrt(a.x), safe_sqrt(a.y), safe_sqrt(a.z));
+}
+
+inline vec3 reflect(const vec3 &wo, const vec3 &n) {
+    return -wo + 2 * glm::dot(wo, n) * n;
+}
+
 inline vec3 homo2carte(const vec4 &v) {
     HARUNOBU_ASSERT(v[3] != 0.0, "Homogeneous element equals to 0!");
     return vec3(v / v[3]);

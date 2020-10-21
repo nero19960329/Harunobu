@@ -28,7 +28,7 @@ void Tri::do_transform(const mat4 &trans_mat) {
            0.5;
 }
 
-sptr<Intersect> Tri::ray_intersect(const Ray &ray, bool &is_intersect) {
+sptr<Intersect> Tri::ray_intersect(const Ray &ray, bool &is_intersect) const {
     sptr<Intersect> intersect = std::make_shared<Intersect>();
     real t = glm::dot(vertices[0] - ray.pos, normal_geo) /
              glm::dot(ray.dir, normal_geo);
@@ -39,6 +39,7 @@ sptr<Intersect> Tri::ray_intersect(const Ray &ray, bool &is_intersect) {
         intersect->ray_step = t;
         intersect->pos = inter_pos;
         intersect->prim = parent_prim;
+        intersect->geo = this;
         intersect->normal =
             normals[0] * bary[0] + normals[1] * bary[1] + normals[2] * bary[2];
         intersect->omega = -ray.dir;
@@ -49,7 +50,7 @@ sptr<Intersect> Tri::ray_intersect(const Ray &ray, bool &is_intersect) {
     return intersect;
 }
 
-vec3 Tri::get_barycentric_coordinate(const vec3 &pos) {
+vec3 Tri::get_barycentric_coordinate(const vec3 &pos) const {
     // P = A + u * (C - A) + v * (B - A)
     // P = aA + bB + cC
     vec3 v0 = vertices[2] - vertices[0];
@@ -69,12 +70,19 @@ vec3 Tri::get_barycentric_coordinate(const vec3 &pos) {
     return vec3(1.0 - u - v, v, u);
 }
 
-vec3 Tri::random_sample() {
+sptr<SampleInfo> Tri::random_sample() const {
     // P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C
-    real sqrt_u = std::sqrt(rng.random_real());
+    real sqrt_u = safe_sqrt(rng.random_real());
     real v = rng.random_real();
     real a = 1. - sqrt_u, b = sqrt_u * (1. - v), c = sqrt_u * v;
-    return a * vertices[0] + b * vertices[1] + c * vertices[2];
+    sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
+    sinfo->pos = vec3(a * vertices[0] + b * vertices[1] + c * vertices[2]);
+    sinfo->pdf = 1.0 / area;
+    auto bary = get_barycentric_coordinate(sinfo->pos);
+    sinfo->normal =
+        normals[0] * bary[0] + normals[1] * bary[1] + normals[2] * bary[2];
+    sinfo->prim = parent_prim;
+    return sinfo;
 }
 
 void Tri::log_current_status() const {

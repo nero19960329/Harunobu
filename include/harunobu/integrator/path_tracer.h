@@ -12,7 +12,7 @@ public:
 public:
     PathTracer(sptr<Scene> scene_, int max_depth_);
 
-    virtual cv::Mat integrate() override;
+    virtual sptr<Image<real>> integrate() override;
 
 private:
     vec3 integrate_ray(const Ray &ray);

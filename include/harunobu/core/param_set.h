@@ -7,7 +7,7 @@
 
 HARUNOBU_NAMESPACE_BEGIN
 
-using param_type = std::variant<int, float, std::string>;
+using param_type = std::variant<int, real, std::string, mat4, vec3, bool>;
 
 class ParamSet {
 private:

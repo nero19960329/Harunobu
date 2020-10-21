@@ -1,10 +1,9 @@
 #include <harunobu/core/param_set.h>
 #include <harunobu/core/utils.h>
 #include <harunobu/io/mitsuba_reader.h>
-#include <harunobu/material/diffuse.h>
 #include <harunobu/sampler/random_sampler.h>
 
-#include <rapidxml/rapidxml_utils.hpp>
+#include <rapidxml_utils.hpp>
 
 #include <cstring>
 #include <sstream>
@@ -91,6 +90,47 @@ inline vec3 load_vec3(rapidxml::xml_attribute<> *vec_attr) {
     }
     HARUNOBU_DEBUG("Load vec3 = {}", glm::to_string(vec));
     return vec;
+}
+
+template <typename T>
+void load_param(rapidxml::xml_node<> *node, ParamSet &param_set,
+                std::vector<std::string> node_names) {
+    for (const auto &name : node_names) {
+        for (auto subnode = node->first_node(name.c_str()); subnode != nullptr;
+             subnode = subnode->next_sibling(name.c_str())) {
+            CHECK_ATTR(subnode, "name");
+            auto attr_name = subnode->first_attribute("name")->value();
+            if (std::is_same<T, int>::value) {
+                CHECK_ATTR(subnode, "value");
+                param_set.add(attr_name,
+                              atoi(subnode->first_attribute("value")->value()));
+            } else if (std::is_same<T, real>::value) {
+                CHECK_ATTR(subnode, "value");
+                param_set.add(attr_name,
+                              atof(subnode->first_attribute("value")->value()));
+            } else if (std::is_same<T, vec3>::value) {
+                if (subnode->first_attribute("value") != nullptr) {
+                    param_set.add(attr_name,
+                                  load_vec3(subnode->first_attribute("value")));
+                } else if (subnode->first_attribute("x") != nullptr) {
+                    CHECK_ATTR(subnode, "y");
+                    CHECK_ATTR(subnode, "z");
+                    param_set.add(
+                        attr_name,
+                        vec3(atof(subnode->first_attribute("x")->value()),
+                             atof(subnode->first_attribute("y")->value()),
+                             atof(subnode->first_attribute("z")->value())));
+                } else {
+                    HARUNOBU_CHECK(false, "Unsupported node type {}.",
+                                   attr_name);
+                }
+            } else if (std::is_same<T, mat4>::value) {
+                CHECK_ATTR(subnode, "value");
+                param_set.add(attr_name,
+                              load_mat4(subnode->first_attribute("value")));
+            }
+        }
+    }
 }
 
 //============================ Class functions ============================
@@ -195,7 +235,6 @@ sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {
 
     vec3 pos, dir, up;
     real fov;
-    int height, width;
 
     // Load floats
     for (auto node = camera_node->first_node("float"); node != nullptr;
@@ -264,20 +303,35 @@ MitsubaReader::load_materials(rapidxml::xml_node<> *scene_node) {
             is_two_sided = true;
         }
 
-        CHECK_ATTR_VALUE(bsdf_node, "type", "diffuse");
-        CHECK_ANY_SUBNODE(bsdf_node, {"rgb"});
-        auto rgb_node = bsdf_node->first_node("rgb");
-        sptr<MaterialBase> material = std::make_shared<Diffuse>();
-        if (rgb_node != nullptr) {
-            CHECK_ATTR_VALUE(rgb_node, "name", "reflectance");
-            material->name = id;
-            material->rgb = load_vec3(rgb_node->first_attribute("value"));
-            material->is_two_sided = is_two_sided;
-        }
+        CHECK_ATTR(bsdf_node, "type");
+        ParamSet param_set;
+        load_param<vec3>(bsdf_node, param_set, {"rgb"});
+        load_param<real>(bsdf_node, param_set, {"float"});
+        load_param<std::string>(bsdf_node, param_set, {"string"});
+        param_set.add("is_two_sided", is_two_sided);
+        param_set.add("id", id);
+
+        std::string material_name = bsdf_node->first_attribute("type")->value();
+        sptr<MaterialBase> material =
+            MaterialBase::factory(material_name, param_set);
         materials[id] = material;
     }
 
     return materials;
+}
+
+void load_object_param(rapidxml::xml_node<> *shape_node, ParamSet &param_set) {
+    auto trans_node = shape_node->first_node("transform");
+    if (trans_node != nullptr) {
+        CHECK_ATTR_VALUE(trans_node, "name", "toWorld");
+        auto trans_mat_node = trans_node->first_node("matrix");
+        CHECK_ATTR(trans_mat_node, "value");
+        auto trans_mat = load_mat4(trans_mat_node->first_attribute("value"));
+        param_set.add("transform", trans_mat);
+    }
+
+    load_param<real>(shape_node, param_set, {"float"});
+    load_param<vec3>(shape_node, param_set, {"point"});
 }
 
 std::pair<sptr<ObjectsBase>, sptr<ObjectsBase>>
@@ -289,17 +343,8 @@ MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
 
     for (auto node = scene_node->first_node("shape"); node != nullptr;
          node = node->next_sibling("shape")) {
-        CHECK_ANY_SUBNODE(node, {"transform"});
         CHECK_ANY_SUBNODE(node, {"ref"});
         CHECK_ATTR(node, "type");
-
-        auto trans_node = node->first_node("transform");
-        CHECK_ATTR_VALUE(trans_node, "name", "toWorld");
-        CHECK_ANY_SUBNODE(trans_node, {"matrix"});
-
-        auto trans_mat_node = trans_node->first_node("matrix");
-        CHECK_ATTR(trans_mat_node, "value");
-        auto trans_mat = load_mat4(trans_mat_node->first_attribute("value"));
 
         auto ref_node = node->first_node("ref");
         CHECK_ATTR(ref_node, "id");
@@ -307,6 +352,9 @@ MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
         HARUNOBU_CHECK(materials.find(ref_mate_id) != materials.end(),
                        "Material '{}' is not mentioned before!", ref_mate_id);
         auto material = materials[ref_mate_id];
+
+        ParamSet param_set;
+        load_object_param(node, param_set);
 
         auto emitter_node = node->first_node("emitter");
         vec3 emit_radiance(0, 0, 0);
@@ -320,7 +368,7 @@ MitsubaReader::load_objects(rapidxml::xml_node<> *scene_node) {
         }
 
         std::string prim_name = node->first_attribute("type")->value();
-        auto prim = PrimitiveBase::factory(prim_name, material, trans_mat);
+        auto prim = PrimitiveBase::factory(prim_name, material, param_set);
         prim->emit_radiance = emit_radiance;
         prim->log_current_status();
 
@@ -339,9 +387,9 @@ sptr<ImagePipeline>
 MitsubaReader::load_image_pipeline(rapidxml::xml_node<> *film_node) {
     HARUNOBU_DEBUG("Loading image_pipeline ...");
 
-    std::string file_format;
-    std::string pixel_format;
-    float gamma;
+    std::string file_format = "png";
+    std::string pixel_format = "rgb";
+    float gamma = 2.2;
 
     for (auto node = film_node->first_node("string"); node != nullptr;
          node = node->next_sibling("string")) {

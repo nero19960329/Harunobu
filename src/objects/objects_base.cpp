@@ -6,6 +6,7 @@ HARUNOBU_NAMESPACE_BEGIN
 
 void ObjectsBase::add_primitive(sptr<PrimitiveBase> prim) {
     geos.insert(geos.end(), prim->geos.begin(), prim->geos.end());
+    prim->idx = prims.size();
     prims.push_back(prim);
 }
 

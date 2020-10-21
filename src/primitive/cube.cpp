@@ -2,6 +2,15 @@
 
 HARUNOBU_NAMESPACE_BEGIN
 
+Cube::Cube(sptr<MaterialBase> material_) : PrimitiveBase(material_) {}
+
+void Cube::init(ParamSet &param_set) {
+    auto trans_mat = param_set.get<mat4>(
+        "transform", mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
+    make_geos(trans_mat);
+    PrimitiveBase::init(param_set);
+}
+
 std::pair<sptr<Tri>, sptr<Tri>>
 Cube::make_rect_geos(const mat4 &trans_mat, const std::array<vec3, 4> &vertices,
                      const vec3 &normal) {
@@ -15,8 +24,6 @@ Cube::make_rect_geos(const mat4 &trans_mat, const std::array<vec3, 4> &vertices,
     tri2->do_transform(trans_mat);
     return std::make_pair(tri1, tri2);
 }
-
-Cube::Cube(sptr<MaterialBase> material_) : PrimitiveBase(material_) {}
 
 void Cube::make_geos(const mat4 &trans_mat) {
     geos.clear();
@@ -50,14 +57,11 @@ void Cube::make_geos(const mat4 &trans_mat) {
 
     for (size_t i = 0; i < rects.size(); ++i) {
         auto [tri1, tri2] = make_rect_geos(trans_mat, rects[i], normals[i]);
+        tri1->idx = geos.size();
         geos.push_back(tri1);
+        tri2->idx = geos.size();
         geos.push_back(tri2);
     }
-}
-
-vec3 Cube::random_sample() {
-    HARUNOBU_CHECK(false, "Not implemented.")
-    return vec3();
 }
 
 void Cube::log_current_status() const {

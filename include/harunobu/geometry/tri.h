@@ -22,13 +22,13 @@ public:
 
     virtual void do_transform(const mat4 &trans_mat) override;
     virtual sptr<Intersect> ray_intersect(const Ray &ray,
-                                          bool &is_intersect) override;
-    virtual vec3 random_sample() override;
+                                          bool &is_intersect) const override;
+    virtual sptr<SampleInfo> random_sample() const override;
 
     virtual void log_current_status() const override;
 
 private:
-    vec3 get_barycentric_coordinate(const vec3 &pos);
+    vec3 get_barycentric_coordinate(const vec3 &pos) const;
 }; // class Tri
 
 HARUNOBU_NAMESPACE_END

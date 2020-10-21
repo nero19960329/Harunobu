@@ -6,7 +6,7 @@ HARUNOBU_NAMESPACE_BEGIN
 
 sptr<IntegratorBase> IntegratorBase::factory(std::string name,
                                              sptr<Scene> scene,
-                                             ParamSet param_set) {
+                                             ParamSet &param_set) {
     if (name == "direct") {
         return std::make_shared<DirectIllumination>(
             scene, param_set.get<int>("max_depth", 65),

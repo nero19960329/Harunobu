@@ -1,21 +1,23 @@
+#include <fstream>
+
 #include <harunobu/core/image_pipeline.h>
+
+#include <png.hpp>
 
 HARUNOBU_NAMESPACE_BEGIN
 
-void ImagePipeline::dump_image(const cv::Mat &raw_image) {
-    cv::Mat image = raw_image;
-
+void ImagePipeline::dump_image(sptr<Image<real>> raw_image) {
     // perform in float32
-    gamma_correction(image, gamma);
-    clamp(image, 0.0f, 1.0f);
+    gamma_correction(raw_image, gamma);
+    clamp(raw_image, 0.0f, 1.0f);
 
-    image.convertTo(image, CV_8UC3, 255);
+    auto image = convert(raw_image);
 
     // perform in uint8
 
     std::string output_name = file_name + "." + file_format;
     HARUNOBU_INFO("Dump into {} ...", output_name);
-    cv::imwrite(output_name, image);
+    save_image(image, output_name);
     HARUNOBU_INFO("Dump done.");
 }
 
@@ -25,35 +27,52 @@ void ImagePipeline::log_current_status() const {
     HARUNOBU_INFO("file_format = {}", file_format);
 }
 
-void ImagePipeline::clamp(cv::Mat &image, float min_value, float max_value) {
-    HARUNOBU_ASSERT(image.type() == CV_32FC3,
-                    "Only float32 image could perform clamp!");
-
-    for (int i = 0; i < image.rows; ++i) {
-        for (int j = 0; j < image.cols; ++j) {
-            auto &rgb = image.at<cv::Vec3f>(i, j);
-            rgb[0] = std::min(std::max(rgb[0], min_value), max_value);
-            rgb[1] = std::min(std::max(rgb[1], min_value), max_value);
-            rgb[2] = std::min(std::max(rgb[2], min_value), max_value);
+void ImagePipeline::clamp(sptr<Image<real>> image, real min_value,
+                          real max_value) {
+    for (size_t i = 0; i < image->width; ++i) {
+        for (size_t j = 0; j < image->height; ++j) {
+            for (size_t k = 0; k < image->channel; ++k) {
+                image->at(k, j, i) = std::min(
+                    std::max(image->at(k, j, i), min_value), max_value);
+            }
         }
     }
 }
 
-void ImagePipeline::gamma_correction(cv::Mat &image, real gamma) {
-    HARUNOBU_ASSERT(image.type() == CV_8UC3,
-                    "Only uint8 image could perform gamma corretion!");
-
-#pragma omp parallel for schedule(dynamic)
-    for (int i = 0; i < image.rows; ++i) {
-        for (int j = 0; j < image.cols; ++j) {
-            image.at<cv::Vec3f>(j, i)[0] =
-                pow(image.at<cv::Vec3f>(j, i)[0], 1.0 / gamma);
-            image.at<cv::Vec3f>(j, i)[1] =
-                pow(image.at<cv::Vec3f>(j, i)[1], 1.0 / gamma);
-            image.at<cv::Vec3f>(j, i)[2] =
-                pow(image.at<cv::Vec3f>(j, i)[2], 1.0 / gamma);
+void ImagePipeline::gamma_correction(sptr<Image<real>> image, real gamma) {
+    for (size_t i = 0; i < image->width; ++i) {
+        for (size_t j = 0; j < image->height; ++j) {
+            for (size_t k = 0; k < image->channel; ++k) {
+                image->at(k, j, i) = pow(image->at(k, j, i), 1.0 / gamma);
+            }
         }
     }
+}
+
+sptr<Image<unsigned char>> ImagePipeline::convert(sptr<Image<real>> image) {
+    sptr<Image<unsigned char>> output = std::make_shared<Image<unsigned char>>(
+        std::array<size_t, 3>{image->channel, image->height, image->width});
+    for (size_t i = 0; i < image->width; ++i) {
+        for (size_t j = 0; j < image->height; ++j) {
+            for (size_t k = 0; k < image->channel; ++k) {
+                output->at(k, j, i) = static_cast<unsigned char>(
+                    std::round(image->at(k, j, i) * 255.0));
+            }
+        }
+    }
+    return output;
+}
+
+void ImagePipeline::save_image(sptr<Image<unsigned char>> image,
+                               std::string output_name) {
+    png::image<png::rgb_pixel> image_png(image->width, image->height);
+    for (size_t i = 0; i < image->width; ++i) {
+        for (size_t j = 0; j < image->height; ++j) {
+            image_png[j][i] = png::rgb_pixel(
+                image->at(0, j, i), image->at(1, j, i), image->at(2, j, i));
+        }
+    }
+    image_png.write(output_name);
 }
 
 HARUNOBU_NAMESPACE_END

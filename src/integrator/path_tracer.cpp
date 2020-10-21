@@ -7,22 +7,23 @@ HARUNOBU_NAMESPACE_BEGIN
 PathTracer::PathTracer(sptr<Scene> scene_, int max_depth_)
     : IntegratorBase(scene_), max_depth(max_depth_) {}
 
-cv::Mat PathTracer::integrate() {
-    cv::Mat raw_image(film->height, film->width, CV_32FC3, CV_RGB(0., 0., 0.));
+sptr<Image<real>> PathTracer::integrate() {
+    auto raw_image = std::make_shared<Image<real>>(
+        std::array<size_t, 3>{3, film->height, film->width});
 
 #pragma omp parallel for schedule(dynamic)
-    for (int i = 0; i < raw_image.rows; ++i) {
+    for (size_t i = 0; i < raw_image->width; ++i) {
         if (i % 100 == 0) {
             HARUNOBU_INFO("Rendering row {} ...", i);
         }
-        for (int j = 0; j < raw_image.cols; ++j) {
+        for (size_t j = 0; j < raw_image->height; ++j) {
             int sample_count = sampler->sample_count;
             for (int k = 0; k < sample_count; ++k) {
                 auto ij = sampler->sample_screen_coor(i, j);
                 auto rgb = integrate_ray(scene->camera->make_ray(
                     ij[0], ij[1], film->height, film->width));
-                cv::Vec3f bgr(rgb[2], rgb[1], rgb[0]);
-                film->add_sample(bgr, ij[0], ij[1]);
+#pragma omp critical
+                { film->add_sample(rgb, ij[0], ij[1]); }
             }
         }
     }

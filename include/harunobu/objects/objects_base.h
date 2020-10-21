@@ -16,6 +16,7 @@ public:
 
     virtual void add_primitive(sptr<PrimitiveBase> prim);
     virtual bool build() { return true; }
+    size_t geos_size() const { return geos.size(); }
 
     virtual sptr<Intersect> ray_intersect(const Ray &ray, bool &is_intersect);
 }; // class ObjectsBase

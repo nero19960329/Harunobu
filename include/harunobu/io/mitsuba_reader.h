@@ -10,7 +10,7 @@
 #include <harunobu/rfilter/rfilter_base.h>
 #include <harunobu/sampler/sampler_base.h>
 
-#include <rapidxml/rapidxml.hpp>
+#include <rapidxml.hpp>
 
 #include <unordered_map>
 #include <vector>
