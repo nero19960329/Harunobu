@@ -1,0 +1,8 @@
+# build
+bazel*
+
+# mac
+*.DS_Store
+
+# vscode
+.vscode
