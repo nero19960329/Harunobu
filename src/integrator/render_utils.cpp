@@ -26,7 +26,9 @@ RenderUtils::light_sample(sptr<Intersect> intersect,
 
 vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
                                       sptr<Intersect> intersect,
-                                      sptr<ObjectsBase> objects) {
+                                      sptr<ObjectsBase> objects,
+                                      int light_sample_num,
+                                      int bsdf_sample_num) {
     vec3 direct_radiance(0, 0, 0);
     vec3 light_radiance(0, 0, 0), bsdf_radiance(0, 0, 0);
 
@@ -37,8 +39,11 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
         geos_pmf.push_back(PMF(lights[i]->geos.size()));
     }
 
+    real light_prob = light_sample_num / static_cast<real>(light_sample_num + bsdf_sample_num);
+    real bsdf_prob = bsdf_sample_num / static_cast<real>(light_sample_num + bsdf_sample_num);
+
     // light sampling
-    {
+    for (int light_sample = 0; light_sample < light_sample_num; ++light_sample) {
         std::vector<sptr<SampleInfo>> sinfo_vec(n);
         for (size_t i = 0; i < n; ++i) {
             auto sinfo = lights[i]->light_sample(intersect, geos_pmf[i]);
@@ -73,20 +78,18 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
             light_radiance = emit_radiance * f * cos_theta_i / light_sinfo->pdf;
 
             real pdf_light = light_sinfo->pdf;
-            sptr<LocalInfo> linfo = std::make_shared<LocalInfo>(
+            linfo = std::make_shared<LocalInfo>(
                 wi, wo, intersect->normal,
                 intersect->prim->material->is_two_sided);
             real pdf_bsdf = intersect->prim->material->pdf(linfo);
 
-            light_radiance *= power_heuristic(pdf_light, pdf_bsdf);
+            light_radiance *= power_heuristic(pdf_light * light_prob, pdf_bsdf * bsdf_prob) / static_cast<real>(light_sample_num);
         }
     }
 
     // bsdf sampling
-    {
-        vec3 x_prime = light_sinfo->pos;
+    for (int bsdf_sample = 0; bsdf_sample < bsdf_sample_num; ++bsdf_sample) {
         vec3 x = intersect->pos;
-        vec3 wi = glm::normalize(x_prime - x);
         vec3 wo = intersect->omega;
 
         sptr<LocalInfo> linfo = std::make_shared<LocalInfo>(
@@ -116,7 +119,7 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
             pdf_light *= geos_pmf[intersect_light->prim->idx].get_pdf(
                 intersect_light->geo->idx);
             pdf_light *= prims_pmf.get_pdf(intersect_light->prim->idx);
-            bsdf_radiance *= power_heuristic(pdf_bsdf, pdf_light);
+            bsdf_radiance *= power_heuristic(pdf_bsdf * bsdf_prob, pdf_light * light_prob) / static_cast<real>(bsdf_sample_num);
         }
     }
 

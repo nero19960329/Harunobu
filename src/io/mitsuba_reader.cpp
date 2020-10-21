@@ -196,6 +196,9 @@ MitsubaReader::load_integrator(rapidxml::xml_node<> *integrator_node,
         } else if (str_equal(node_name, "emitterSamples")) {
             param_set.add("light_sample_num",
                           atoi(node->first_attribute("value")->value()));
+        } else if (str_equal(node_name, "bsdfSamples")) {
+            param_set.add("bsdf_sample_num",
+                          atoi(node->first_attribute("value")->value()));
         } else {
             IGNORE_ATTR(integrator_node, node_name);
         }

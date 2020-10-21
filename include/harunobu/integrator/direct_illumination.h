@@ -8,11 +8,11 @@ HARUNOBU_NAMESPACE_BEGIN
 class DirectIllumination : public IntegratorBase {
 public:
     int max_depth;
-    int light_sample_num;
+    int light_sample_num, bsdf_sample_num;
 
 public:
     DirectIllumination(sptr<Scene> scene_, int max_depth_,
-                       int light_sample_num_);
+                       int light_sample_num_, int bsdf_sample_num_);
 
     virtual sptr<Image<real>> integrate() override;
 
