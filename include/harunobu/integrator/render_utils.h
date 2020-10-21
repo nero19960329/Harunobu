@@ -15,10 +15,6 @@ public:
     light_sample(sptr<Intersect> intersect,
                  const std::vector<sptr<SampleInfo>> &sinfo_vec, PMF &pmf);
 
-    static vec3
-    get_direct_radiance_light_sampling(sptr<Intersect> intersect,
-                                       sptr<SampleInfo> light_sinfo);
-
     static vec3 get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
                                     sptr<Intersect> intersect,
                                     sptr<ObjectsBase> objects);
