@@ -38,7 +38,7 @@ vec3 DirectIllumination::integrate_ray(const Ray &ray) {
     auto intersect = scene->objects->ray_intersect(ray, is_intersect);
 
     if (!is_intersect) {
-        return vec3(0.0, 0.0, 0.0);
+        return vec3(0, 0, 0);
     }
 
     // emission

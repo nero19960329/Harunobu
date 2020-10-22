@@ -73,13 +73,14 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
                 intersect->prim->material->is_two_sided);
             real cos_theta_i = linfo->normal_dot(linfo->wi);
             real cos_theta_o = glm::dot(light_sinfo->normal, -wi);
+            vec3 light_radiance_per_sample(0, 0, 0);
             if (cos_theta_i <= 0.0 || cos_theta_o <= 0.0) {
-                return vec3(0, 0, 0);
+                continue;
             }
 
             vec3 emit_radiance = light_sinfo->prim->emit_radiance;
             vec3 f = intersect->prim->material->f(linfo);
-            vec3 light_radiance_per_sample =
+            light_radiance_per_sample =
                 emit_radiance * f * cos_theta_i / light_sinfo->pdf;
 
             real pdf_light = light_sinfo->pdf;

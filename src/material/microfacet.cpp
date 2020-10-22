@@ -17,6 +17,9 @@ vec3 Microfacet::f(sptr<LocalInfo> linfo) const {
 
 void Microfacet::sample(sptr<LocalInfo> linfo) const {
     vec3 wh = sample_wh(linfo);
+    if (is_two_sided && !linfo->same_hemisphere(wh, linfo->wo)) {
+        wh = -wh;
+    }
     linfo->wi = reflect(linfo->wo, wh);
 }
 
