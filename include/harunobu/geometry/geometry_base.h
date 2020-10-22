@@ -43,6 +43,7 @@ public:
     vec3 to_local(const vec3 &w) const;
 
     real normal_dot(const vec3 &w) const;
+    bool same_hemisphere(const vec3 &u, const vec3 &v) const;
 }; // class LocalInfo
 
 class GeometryBase {
