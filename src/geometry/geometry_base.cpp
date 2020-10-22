@@ -26,6 +26,10 @@ real LocalInfo::normal_dot(const vec3 &w) const {
     }
 }
 
+bool LocalInfo::same_hemisphere(const vec3 &u, const vec3 &v) const {
+    return (u.z >= 0 && v.z >= 0) || (u.z <= 0 && v.z <= 0);
+}
+
 sptr<SampleInfo> GeometryBase::light_sample(sptr<Intersect> intersect) const {
     auto sinfo = random_sample();
     sinfo->pdf = light_sample_pdf(intersect->pos, sinfo->pos, sinfo->normal);

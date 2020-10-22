@@ -14,9 +14,13 @@ void MaterialBase::log_current_status() const {
 void MaterialBase::sample(sptr<LocalInfo> linfo) const {
     real phi = rng.random_real(0, 2 * pi());
     real theta = std::acos(safe_sqrt(rng.random_real()));
-    vec3 basis(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta),
-               std::cos(theta));
-    linfo->wi = basis;
+    vec3 wi(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta),
+            std::cos(theta));
+    if (is_two_sided && !linfo->same_hemisphere(wi, linfo->wo)) {
+        linfo->wi = -wi;
+    } else {
+        linfo->wi = wi;
+    }
 }
 
 real MaterialBase::pdf(sptr<LocalInfo> linfo) const {
