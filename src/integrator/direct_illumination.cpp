@@ -17,7 +17,7 @@ sptr<Image<real>> DirectIllumination::integrate() {
 #pragma omp parallel for schedule(dynamic)
     for (size_t i = 0; i < raw_image->width; ++i) {
         if (i % 100 == 0) {
-            HARUNOBU_INFO("Rendering row {} ...", i);
+            HARUNOBU_INFO("Rendering col {} ...", i);
         }
         for (size_t j = 0; j < raw_image->height; ++j) {
             int sample_count = sampler->sample_count;

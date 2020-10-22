@@ -14,7 +14,7 @@ sptr<Image<real>> PathTracer::integrate() {
 #pragma omp parallel for schedule(dynamic)
     for (size_t i = 0; i < raw_image->width; ++i) {
         if (i % 100 == 0) {
-            HARUNOBU_INFO("Rendering row {} ...", i);
+            HARUNOBU_INFO("Rendering col {} ...", i);
         }
         for (size_t j = 0; j < raw_image->height; ++j) {
             int sample_count = sampler->sample_count;
@@ -35,7 +35,6 @@ vec3 PathTracer::integrate_ray(const Ray &ray, int depth) {
     auto intersect = scene->objects->ray_intersect(ray, is_intersect);
 
     if (!is_intersect) {
-        HARUNOBU_DEBUG("NOT intersect!");
         return vec3(0, 0, 0);
     }
 
