@@ -4,9 +4,7 @@
 
 HARUNOBU_NAMESPACE_BEGIN
 
-inline real safe_sqrt(real a) {
-    return std::sqrt(std::max(a, static_cast<real>(0)));
-}
+inline real safe_sqrt(real a) { return std::sqrt(std::max(a, zero)); }
 
 inline vec3 safe_sqrt(vec3 a) {
     return vec3(safe_sqrt(a.x), safe_sqrt(a.y), safe_sqrt(a.z));

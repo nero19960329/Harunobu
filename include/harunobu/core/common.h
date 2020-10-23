@@ -62,8 +62,10 @@ using mat4 = glm::mat4;
 #endif
 
 // math constants
-constexpr double pi() { return std::atan(1) * 4; }
+constexpr real pi() { return std::atan(1) * 4; }
 inline constexpr real eps = 1e-6;
+inline constexpr real zero = 0.;
+inline constexpr real one = 1.;
 
 // abbrs
 template <typename T> using sptr = std::shared_ptr<T>;

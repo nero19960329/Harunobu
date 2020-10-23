@@ -9,9 +9,15 @@ public:
     int sample_count;
 
 public:
-    SamplerBase() {}
+    SamplerBase() : pixel_index(0) {}
 
-    virtual vec2 sample_screen_coor(int i, int j) const = 0;
+    virtual void next_pixel() { pixel_index++; }
+
+    virtual real next_1D() const = 0;
+    virtual vec2 next_2D() const = 0;
+
+protected:
+    size_t pixel_index;
 }; // class SamplerBase
 
 HARUNOBU_NAMESPACE_END

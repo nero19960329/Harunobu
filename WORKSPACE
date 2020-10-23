@@ -47,3 +47,11 @@ http_archive(
     strip_prefix = "png++-0.2.10",
     url = "https://download.savannah.nongnu.org/releases/pngpp/png++-0.2.10.tar.gz",
 )
+
+# indicators
+http_archive(
+    name = "indicators",
+    build_file = "@//:external/indicators.BUILD",
+    strip_prefix = "indicators-1.9",
+    url = "https://github.com/p-ranav/indicators/archive/v1.9.zip",
+)

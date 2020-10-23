@@ -7,7 +7,7 @@ Camera::Camera(const vec3 &pos_, const vec3 &dir_, const vec3 &up_, real fov_)
 
 Ray Camera::make_ray(real i, real j, int height, int width) const {
     vec3 ray_dst = pos;
-    ray_dst += dir * static_cast<real>(1);
+    ray_dst += dir * one;
     real w = 2.0 * tan(fov * 0.5);
     real pixel = w / static_cast<real>(width);
     auto horizontal = glm::normalize(glm::cross(dir, up));

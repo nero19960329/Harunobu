@@ -6,9 +6,10 @@ class RandomSampler : public SamplerBase {
 public:
     RandomSampler() : SamplerBase() {}
 
-    virtual vec2 sample_screen_coor(int i, int j) const override {
-        return vec2(i + rng.random_real(-0.5, 0.5),
-                    j + rng.random_real(-0.5, 0.5));
+    virtual real next_1D() const override { return rng.random_real(); }
+
+    virtual vec2 next_2D() const override {
+        return vec2(rng.random_real(), rng.random_real());
     }
 }; // class RandomSampler
 

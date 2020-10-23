@@ -5,30 +5,7 @@
 HARUNOBU_NAMESPACE_BEGIN
 
 PathTracer::PathTracer(sptr<Scene> scene_, int max_depth_)
-    : IntegratorBase(scene_), max_depth(max_depth_) {}
-
-sptr<Image<real>> PathTracer::integrate() {
-    auto raw_image = std::make_shared<Image<real>>(
-        std::array<size_t, 3>{3, film->height, film->width});
-
-#pragma omp parallel for schedule(dynamic)
-    for (size_t i = 0; i < raw_image->width; ++i) {
-        if (i % 100 == 0) {
-            HARUNOBU_INFO("Rendering col {} ...", i);
-        }
-        for (size_t j = 0; j < raw_image->height; ++j) {
-            int sample_count = sampler->sample_count;
-            for (int k = 0; k < sample_count; ++k) {
-                auto ij = sampler->sample_screen_coor(i, j);
-                auto rgb = integrate_ray(scene->camera->make_ray(
-                    ij[0], ij[1], film->height, film->width));
-#pragma omp critical
-                { film->add_sample(rgb, ij[0], ij[1]); }
-            }
-        }
-    }
-    return film->make_image();
-}
+    : RayTracer(scene_, max_depth_) {}
 
 vec3 PathTracer::integrate_ray(const Ray &ray, int depth) {
     bool is_intersect;
@@ -55,8 +32,7 @@ vec3 PathTracer::integrate_ray(const Ray &ray, int depth) {
     intersect->prim->material->sample(linfo);
     real pdf = intersect->prim->material->pdf(linfo);
     vec3 wi = linfo->to_world(linfo->wi);
-    real cos_theta_i =
-        std::max(linfo->normal_dot(linfo->wi), static_cast<real>(0));
+    real cos_theta_i = std::max(linfo->normal_dot(linfo->wi), zero);
     vec3 t = intersect->prim->material->f(linfo) * cos_theta_i / pdf;
     real contrib_ratio = std::max(t[0], std::max(t[1], t[2]));
     real survival_prob = std::max(std::min(contrib_ratio, .95), .05);

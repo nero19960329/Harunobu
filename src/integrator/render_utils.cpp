@@ -113,8 +113,7 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
         bool is_intersect_light;
         auto intersect_light =
             objects->ray_intersect(light_test_ray, is_intersect_light);
-        real cos_theta_i =
-            std::max(linfo->normal_dot(linfo->wi), static_cast<real>(0.));
+        real cos_theta_i = std::max(linfo->normal_dot(linfo->wi), zero);
         if (is_intersect_light &&
             glm::length(intersect_light->prim->emit_radiance) > 0.0) {
             vec3 emit_radiance = intersect_light->prim->emit_radiance;

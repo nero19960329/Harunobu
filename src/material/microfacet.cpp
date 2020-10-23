@@ -29,7 +29,7 @@ real Microfacet::pdf(sptr<LocalInfo> linfo) const {
     }
     vec3 wh = glm::normalize(linfo->wi + linfo->wo);
     return D(wh, linfo) * G1(linfo->wo, linfo) *
-           std::max(static_cast<real>(0), glm::dot(linfo->wo, wh)) /
+           std::max(zero, glm::dot(linfo->wo, wh)) /
            (std::abs(linfo->normal_dot(linfo->wo)) * 4 *
             glm::dot(linfo->wo, wh));
 }
