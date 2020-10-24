@@ -10,7 +10,7 @@ DirectIllumination::DirectIllumination(sptr<Scene> scene_, int max_depth_,
     : RayTracer(scene_, max_depth_), light_sample_num(light_sample_num_),
       bsdf_sample_num(bsdf_sample_num_) {}
 
-vec3 DirectIllumination::integrate_ray(const Ray &ray, int depth) {
+vec3 DirectIllumination::integrate_ray(const Ray &ray, sptr<SamplerBase> sampler, int depth) {
     bool is_intersect;
     auto intersect = scene->objects->ray_intersect(ray, is_intersect);
 
@@ -23,7 +23,7 @@ vec3 DirectIllumination::integrate_ray(const Ray &ray, int depth) {
 
     // direct illumination
     color += RenderUtils::get_direct_radiance(scene->lights->prims, intersect,
-                                              scene->objects, light_sample_num,
+                                              scene->objects, sampler, light_sample_num,
                                               bsdf_sample_num);
 
     return color;

@@ -15,8 +15,8 @@ vec3 Microfacet::f(sptr<LocalInfo> linfo) const {
            specular_reflectance / (4 * cos_theta_i * cos_theta_o);
 }
 
-void Microfacet::sample(sptr<LocalInfo> linfo) const {
-    vec3 wh = sample_wh(linfo);
+void Microfacet::sample(sptr<LocalInfo> linfo, sptr<SamplerBase> sampler) const {
+    vec3 wh = sample_wh(linfo, sampler);
     if (is_two_sided && !linfo->same_hemisphere(wh, linfo->wo)) {
         wh = -wh;
     }
@@ -73,8 +73,10 @@ void Microfacet::log_current_status() const {
                   glm::to_string(specular_reflectance));
 }
 
-vec3 Beckmann::sample_wh(sptr<LocalInfo> linfo) const {
-    real u = rng.random_real(), phi = rng.random_real(0, 2 * pi());
+vec3 Beckmann::sample_wh(sptr<LocalInfo> linfo, sptr<SamplerBase> sampler) const {
+    vec2 uv = sampler->next_2D();
+    real u = uv[0];
+    real phi = uv[1] * 2 * pi();
     real tan2_theta = -alpha * alpha * std::log(u);
     real cos_theta = 1 / safe_sqrt(1 + tan2_theta);
     real sin_theta = safe_sqrt(1. - cos_theta * cos_theta);

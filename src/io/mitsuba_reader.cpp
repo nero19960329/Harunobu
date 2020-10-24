@@ -2,6 +2,7 @@
 #include <harunobu/core/utils.h>
 #include <harunobu/io/mitsuba_reader.h>
 #include <harunobu/sampler/random_sampler.h>
+#include <harunobu/sampler/stratified_sampler.h>
 
 #include <rapidxml_utils.hpp>
 
@@ -181,32 +182,14 @@ MitsubaReader::load_integrator(rapidxml::xml_node<> *integrator_node,
     HARUNOBU_DEBUG("Loading integrator ...");
     CHECK_ATTR(integrator_node, "type");
 
-    std::unordered_map<std::string, std::string> type_map{
-        {"direct", "direct"}, {"path", "path_tracer"}};
-    ParamSet param_set;
-
-    // Load integer
-    for (auto node = integrator_node->first_node("integer"); node != nullptr;
-         node = node->next_sibling("integer")) {
-        auto node_name = node->first_attribute("name")->value();
-        HARUNOBU_DEBUG("Traversing node {}-{}", node->name(), node_name);
-        if (str_equal(node_name, "maxDepth")) {
-            param_set.add("max_depth",
-                          atoi(node->first_attribute("value")->value()));
-        } else if (str_equal(node_name, "emitterSamples")) {
-            param_set.add("light_sample_num",
-                          atoi(node->first_attribute("value")->value()));
-        } else if (str_equal(node_name, "bsdfSamples")) {
-            param_set.add("bsdf_sample_num",
-                          atoi(node->first_attribute("value")->value()));
-        } else {
-            IGNORE_ATTR(integrator_node, node_name);
-        }
-    }
+    AttrDict type_map({{"direct", "direct"}, {"path", "path_tracer"}});
+    AttrDict name_map({{"maxDepth", "max_depth"}, {"emitterSamples", "light_sample_num"}, {"bsdfSamples", "bsdf_sample_num"}});
+    ParamSet param_set(name_map);
+    load_param<int>(integrator_node, param_set, {"integer"});
 
     std::string mitsuba_integrator_type =
         integrator_node->first_attribute("type")->value();
-    return IntegratorBase::factory(type_map[mitsuba_integrator_type], scene,
+    return IntegratorBase::factory(type_map.get(mitsuba_integrator_type), scene,
                                    param_set);
 }
 
@@ -214,22 +197,18 @@ sptr<SamplerBase>
 MitsubaReader::load_sampler(rapidxml::xml_node<> *sampler_node) {
     HARUNOBU_DEBUG("Loading sampler ...");
     CHECK_ATTR(sampler_node, "type");
-    HARUNOBU_WARN("All type of sampler would cast into RandomSampler.");
-    CHECK_ANY_SUBNODE(sampler_node, {"integer"});
-    sptr<SamplerBase> sampler = std::make_shared<RandomSampler>();
-    for (auto node = sampler_node->first_node("integer"); node != nullptr;
-         node = node->next_sibling("integer")) {
-        CHECK_ATTR(node, "name");
-        CHECK_ATTR(node, "value");
-        if (str_equal(node->first_attribute("name")->value(), "sampleCount")) {
-            sampler->sample_count =
-                atoi(node->first_attribute("value")->value());
-        } else {
-            IGNORE_SUBNODE(sampler_node,
-                           node->first_attribute("name")->value());
-        }
-    }
-    return sampler;
+
+    AttrDict type_map({{"independent", "random"}, {"stratified", "stratified"}});
+    AttrDict name_map({
+        {"sampleCount", "sample_count"},
+        {"dimension", "dim_valid"}});
+
+    ParamSet param_set(name_map);
+    load_param<int>(sampler_node, param_set, {"integer"});
+
+    std::string mitsuba_sampler_type = 
+        sampler_node->first_attribute("type")->value();
+    return SamplerBase::factory(type_map.get(mitsuba_sampler_type), param_set);
 }
 
 sptr<Camera> MitsubaReader::load_camera(rapidxml::xml_node<> *camera_node) {

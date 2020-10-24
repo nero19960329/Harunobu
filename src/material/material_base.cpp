@@ -11,9 +11,10 @@ void MaterialBase::log_current_status() const {
     HARUNOBU_INFO("rgb = {}", glm::to_string(rgb));
 }
 
-void MaterialBase::sample(sptr<LocalInfo> linfo) const {
-    real phi = rng.random_real(0, 2 * pi());
-    real theta = std::acos(safe_sqrt(rng.random_real()));
+void MaterialBase::sample(sptr<LocalInfo> linfo, sptr<SamplerBase> sampler) const {
+    vec2 uv = sampler->next_2D();
+    real phi = uv[0] * 2 * pi();
+    real theta = std::acos(safe_sqrt(uv[1]));
     vec3 wi(std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta),
             std::cos(theta));
     if (is_two_sided && !linfo->same_hemisphere(wi, linfo->wo)) {

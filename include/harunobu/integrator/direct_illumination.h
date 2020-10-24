@@ -13,7 +13,7 @@ public:
                        int light_sample_num_, int bsdf_sample_num_);
 
 private:
-    virtual vec3 integrate_ray(const Ray &ray, int depth = 0) override;
+    virtual vec3 integrate_ray(const Ray &ray, sptr<SamplerBase> sampler, int depth = 0) override;
 }; // class DirectIllumination
 
 HARUNOBU_NAMESPACE_END

@@ -70,10 +70,11 @@ vec3 Tri::get_barycentric_coordinate(const vec3 &pos) const {
     return vec3(1.0 - u - v, v, u);
 }
 
-sptr<SampleInfo> Tri::random_sample() const {
+sptr<SampleInfo> Tri::random_sample(sptr<SamplerBase> sampler) const {
     // P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C
-    real sqrt_u = safe_sqrt(rng.random_real());
-    real v = rng.random_real();
+    vec2 uv = sampler->next_2D();
+    real sqrt_u = safe_sqrt(uv[0]);
+    real v = uv[1];
     real a = 1. - sqrt_u, b = sqrt_u * (1. - v), c = sqrt_u * v;
     sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
     sinfo->pos = vec3(a * vertices[0] + b * vertices[1] + c * vertices[2]);

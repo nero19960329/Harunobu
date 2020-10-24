@@ -1,6 +1,7 @@
 #pragma once
 
 #include <harunobu/core/common.h>
+#include <harunobu/sampler/sampler_base.h>
 
 HARUNOBU_NAMESPACE_BEGIN
 
@@ -39,9 +40,9 @@ public:
         }
     }
 
-    size_t sample() const {
+    size_t sample(sptr<SamplerBase> sampler) const {
         size_t n = pdf.size();
-        real random = rng.random_real();
+        real random = sampler->next_1D();
         size_t idx;
         for (idx = 1; idx <= n; ++idx) {
             if (random <= cdf[idx]) {

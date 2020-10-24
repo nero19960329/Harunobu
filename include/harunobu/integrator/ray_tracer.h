@@ -15,7 +15,7 @@ public:
     virtual sptr<Image<real>> integrate();
 
 protected:
-    virtual vec3 integrate_ray(const Ray &ray, int depth = 0) = 0;
+    virtual vec3 integrate_ray(const Ray &ray, sptr<SamplerBase> sampler, int depth = 0) = 0;
 }; // class RayTracer
 
 HARUNOBU_NAMESPACE_END

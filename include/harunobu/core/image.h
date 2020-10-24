@@ -8,7 +8,7 @@ HARUNOBU_NAMESPACE_BEGIN
 
 template <typename T> class Image {
 private:
-    std::unique_ptr<T[]> data;
+    uptr<T[]> data;
 
 public:
     size_t width, height, channel;

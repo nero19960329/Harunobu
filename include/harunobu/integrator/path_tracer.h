@@ -12,7 +12,7 @@ public:
     PathTracer(sptr<Scene> scene_, int max_depth_);
 
 private:
-    virtual vec3 integrate_ray(const Ray &ray, int depth = 0) override;
+    virtual vec3 integrate_ray(const Ray &ray, sptr<SamplerBase> sampler, int depth = 0) override;
 }; // class PathTracer
 
 HARUNOBU_NAMESPACE_END

@@ -1,4 +1,5 @@
 #include <harunobu/material/material_base.h>
+#include <harunobu/sampler/sampler_base.h>
 
 HARUNOBU_NAMESPACE_BEGIN
 
@@ -11,12 +12,12 @@ public:
     Microfacet() : MaterialBase() {}
 
     virtual vec3 f(sptr<LocalInfo> linfo) const;
-    virtual void sample(sptr<LocalInfo> linfo) const;
+    virtual void sample(sptr<LocalInfo> linfo, sptr<SamplerBase> sampler) const;
     virtual real pdf(sptr<LocalInfo> linfo) const;
     virtual void log_current_status() const;
 
 protected:
-    virtual vec3 sample_wh(sptr<LocalInfo> linfo) const = 0;
+    virtual vec3 sample_wh(sptr<LocalInfo> linfo, sptr<SamplerBase> sampler) const = 0;
 
     virtual real D(const vec3 &wh, sptr<LocalInfo> linfo) const = 0;
     virtual real G(sptr<LocalInfo> linfo) const;
@@ -36,7 +37,7 @@ public:
     virtual void log_current_status() const;
 
 private:
-    virtual vec3 sample_wh(sptr<LocalInfo> linfo) const override;
+    virtual vec3 sample_wh(sptr<LocalInfo> linfo, sptr<SamplerBase> sampler) const override;
 
     virtual real D(const vec3 &wh, sptr<LocalInfo> linfo) const override;
     virtual real Lambda(const vec3 &w, sptr<LocalInfo> linfo) const override;

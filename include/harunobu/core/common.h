@@ -69,6 +69,7 @@ inline constexpr real one = 1.;
 
 // abbrs
 template <typename T> using sptr = std::shared_ptr<T>;
+template <typename T> using uptr = std::unique_ptr<T>;
 
 // assertion
 #ifdef NDEBUG
@@ -94,8 +95,10 @@ template <typename T> using sptr = std::shared_ptr<T>;
 
 // random number
 class RNG {
-private:
+public:
     std::mt19937 rng;
+
+private:
     std::uniform_real_distribution<real> real_dist;
     std::uniform_int_distribution<std::mt19937::result_type> int_dist;
 

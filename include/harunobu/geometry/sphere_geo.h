@@ -18,9 +18,9 @@ public:
     virtual void do_transform(const mat4 &trans_mat) override;
     virtual sptr<Intersect> ray_intersect(const Ray &ray,
                                           bool &is_intersect) const override;
-    virtual sptr<SampleInfo> random_sample() const override;
+    virtual sptr<SampleInfo> random_sample(sptr<SamplerBase> sampler) const override;
     virtual sptr<SampleInfo>
-    light_sample(sptr<Intersect> intersect) const override;
+    light_sample(sptr<Intersect> intersect, sptr<SamplerBase> sampler) const override;
     virtual real light_sample_pdf(const vec3 &x, const vec3 &x_light,
                                   const vec3 &n_light) const override;
 
