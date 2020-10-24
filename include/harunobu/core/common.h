@@ -14,12 +14,23 @@
 #include <glm/gtx/norm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include <omp.h>
+
 #include <cmath>
 #include <cstdlib>
 #include <memory>
 #include <random>
 
 namespace harunobu {
+
+// openmp
+#ifdef NDEBUG
+inline int get_max_threads() { return omp_get_max_threads(); }
+inline int get_thread_num() { return omp_get_thread_num(); }
+#else
+inline int get_max_threads() { return 1; }
+inline int get_thread_num() { return 0; }
+#endif
 
 // macros
 #define HARUNOBU_NAMESPACE_BEGIN namespace harunobu {
@@ -62,11 +73,14 @@ using mat4 = glm::mat4;
 #endif
 
 // math constants
-constexpr double pi() { return std::atan(1) * 4; }
+constexpr real pi() { return std::atan(1) * 4; }
 inline constexpr real eps = 1e-6;
+inline constexpr real zero = 0.;
+inline constexpr real one = 1.;
 
 // abbrs
 template <typename T> using sptr = std::shared_ptr<T>;
+template <typename T> using uptr = std::unique_ptr<T>;
 
 // assertion
 #ifdef NDEBUG
@@ -92,8 +106,10 @@ template <typename T> using sptr = std::shared_ptr<T>;
 
 // random number
 class RNG {
-private:
+public:
     std::mt19937 rng;
+
+private:
     std::uniform_real_distribution<real> real_dist;
     std::uniform_int_distribution<std::mt19937::result_type> int_dist;
 

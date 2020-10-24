@@ -36,22 +36,23 @@ void PrimitiveBase::make_area() {
     }
 }
 
-sptr<SampleInfo> PrimitiveBase::random_sample() {
+sptr<SampleInfo> PrimitiveBase::random_sample(sptr<SamplerBase> sampler) {
     size_t random_idx = rng.random_idx(0, geos.size() - 1);
-    auto sinfo = geos[random_idx]->random_sample();
+    auto sinfo = geos[random_idx]->random_sample(sampler);
     sinfo->pdf /= geos.size();
     return sinfo;
 }
 
 sptr<SampleInfo> PrimitiveBase::light_sample(sptr<Intersect> intersect,
+                                             sptr<SamplerBase> sampler,
                                              PMF &pmf) {
     size_t n = geos.size();
     std::vector<sptr<SampleInfo>> sinfo_vec(n);
     for (size_t i = 0; i < n; ++i) {
-        auto sinfo = geos[i]->light_sample(intersect);
+        auto sinfo = geos[i]->light_sample(intersect, sampler);
         sinfo_vec[i] = sinfo;
     }
-    return RenderUtils::light_sample(intersect, sinfo_vec, pmf);
+    return RenderUtils::light_sample(intersect, sinfo_vec, sampler, pmf);
 }
 
 HARUNOBU_NAMESPACE_END

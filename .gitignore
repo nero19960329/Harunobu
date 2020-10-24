@@ -6,3 +6,6 @@ bazel*
 
 # vscode
 .vscode
+
+# scenes
+scenes

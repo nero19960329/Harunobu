@@ -13,6 +13,7 @@ cc_library(
         "@rapidxml//:rapidxml",
         "@libpng//:libpng",
         "@pngpp//:pngpp",
+        "@indicators//:indicators",
     ]
 )
 

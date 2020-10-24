@@ -13,11 +13,13 @@ class RenderUtils {
 public:
     static sptr<SampleInfo>
     light_sample(sptr<Intersect> intersect,
-                 const std::vector<sptr<SampleInfo>> &sinfo_vec, PMF &pmf);
+                 const std::vector<sptr<SampleInfo>> &sinfo_vec, 
+                 sptr<SamplerBase> sampler, PMF &pmf);
 
     static vec3 get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
                                     sptr<Intersect> intersect,
                                     sptr<ObjectsBase> objects,
+                                    sptr<SamplerBase> sampler,
                                     int light_sample_num, int bsdf_sample_num);
 }; // class RenderUtils
 

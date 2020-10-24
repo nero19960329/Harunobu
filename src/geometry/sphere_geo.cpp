@@ -43,13 +43,14 @@ sptr<Intersect> SphereGeo::ray_intersect(const Ray &ray,
     return intersect;
 }
 
-sptr<SampleInfo> SphereGeo::random_sample() const {
+sptr<SampleInfo> SphereGeo::random_sample(sptr<SamplerBase> sampler) const {
     // x = \sqrt{1 - u^2}cos\theta
     // y = \sqrt{1 - u^2}sin\theta
     // z = u
     // u \in [-1, 1], \theta \in [0, 2\pi)
-    real u = rng.random_real(-1, 1);
-    real theta = rng.random_real(0, 2 * pi());
+    vec2 uv = sampler->next_2D();
+    real u = uv[0] * 2 - 1;
+    real theta = uv[1] * 2 * pi();
     real t = safe_sqrt(1 - u * u);
     vec3 unit_sample(t * cos(theta), t * sin(theta), u);
     sptr<SampleInfo> sinfo = std::make_shared<SampleInfo>();
@@ -60,18 +61,19 @@ sptr<SampleInfo> SphereGeo::random_sample() const {
     return sinfo;
 }
 
-sptr<SampleInfo> SphereGeo::light_sample(sptr<Intersect> intersect) const {
+sptr<SampleInfo> SphereGeo::light_sample(sptr<Intersect> intersect, sptr<SamplerBase> sampler) const {
     vec3 x = intersect->pos;
     vec3 w = glm::normalize(center - x);
     vec3 v = glm::normalize(glm::cross(w, intersect->normal));
     vec3 u = glm::normalize(glm::cross(v, w));
     if (glm::any(glm::isnan(v)) || glm::any(glm::isnan(u))) {
-        return GeometryBase::light_sample(intersect);
+        return GeometryBase::light_sample(intersect, sampler);
     }
 
     real t = 1 - safe_sqrt(1 - radius * radius / glm::length2(center - x));
-    real theta = std::acos(1 - t * rng.random_real());
-    real phi = rng.random_real(0, 2 * pi());
+    vec2 uv = sampler->next_2D();
+    real theta = std::acos(1 - t * uv[0]);
+    real phi = uv[1] * 2 * pi();
     vec3 a = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)) *
              mat3(u[0], v[0], w[0], u[1], v[1], w[1], u[2], v[2], w[2]);
     Ray ray(x, glm::normalize(a));
@@ -79,7 +81,7 @@ sptr<SampleInfo> SphereGeo::light_sample(sptr<Intersect> intersect) const {
     bool is_intersect;
     auto light_intersect = ray_intersect(ray, is_intersect);
     if (!is_intersect) {
-        return GeometryBase::light_sample(intersect);
+        return GeometryBase::light_sample(intersect, sampler);
     }
 
     vec3 x_prime = light_intersect->pos;
@@ -89,7 +91,7 @@ sptr<SampleInfo> SphereGeo::light_sample(sptr<Intersect> intersect) const {
     sinfo->normal = light_intersect->normal;
     sinfo->prim = light_intersect->prim;
     if (sinfo->pdf <= 0.0) {
-        return GeometryBase::light_sample(intersect);
+        return GeometryBase::light_sample(intersect, sampler);
     }
     return sinfo;
 }

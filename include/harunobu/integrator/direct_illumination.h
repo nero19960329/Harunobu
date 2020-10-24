@@ -1,23 +1,19 @@
 #pragma once
 
-#include <harunobu/core/basic.h>
-#include <harunobu/integrator/integrator_base.h>
+#include <harunobu/integrator/ray_tracer.h>
 
 HARUNOBU_NAMESPACE_BEGIN
 
-class DirectIllumination : public IntegratorBase {
+class DirectIllumination : public RayTracer {
 public:
-    int max_depth;
     int light_sample_num, bsdf_sample_num;
 
 public:
     DirectIllumination(sptr<Scene> scene_, int max_depth_,
                        int light_sample_num_, int bsdf_sample_num_);
 
-    virtual sptr<Image<real>> integrate() override;
-
 private:
-    vec3 integrate_ray(const Ray &ray);
+    virtual vec3 integrate_ray(const Ray &ray, sptr<SamplerBase> sampler, int depth = 0) override;
 }; // class DirectIllumination
 
 HARUNOBU_NAMESPACE_END

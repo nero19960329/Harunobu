@@ -17,7 +17,7 @@ public:
     MaterialBase() : rgb(0, 0, 0), is_two_sided(false) {}
 
     virtual vec3 f(sptr<LocalInfo> linfo) const = 0;
-    virtual void sample(sptr<LocalInfo> linfo) const;
+    virtual void sample(sptr<LocalInfo> linfo, sptr<SamplerBase> sampler) const;
     virtual real pdf(sptr<LocalInfo> linfo) const;
     virtual void log_current_status() const;
 

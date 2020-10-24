@@ -34,8 +34,8 @@ public:
         light_sampling_weight =
             param_set.get<real>("light_sampling_weight", 1.);
     }
-    virtual sptr<SampleInfo> random_sample();
-    virtual sptr<SampleInfo> light_sample(sptr<Intersect> intersect, PMF &pmf);
+    virtual sptr<SampleInfo> random_sample(sptr<SamplerBase> sampler);
+    virtual sptr<SampleInfo> light_sample(sptr<Intersect> intersect, sptr<SamplerBase> sampler, PMF &pmf);
 
 protected:
     void make_area();

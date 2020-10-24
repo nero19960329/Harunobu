@@ -11,6 +11,7 @@ inline real power_heuristic(real a, real b) { return a * a / (a * a + b * b); }
 sptr<SampleInfo>
 RenderUtils::light_sample(sptr<Intersect> intersect,
                           const std::vector<sptr<SampleInfo>> &sinfo_vec,
+                          sptr<SamplerBase> sampler,
                           PMF &pmf) {
     size_t n = sinfo_vec.size();
     std::vector<real> pdf(n);
@@ -18,7 +19,7 @@ RenderUtils::light_sample(sptr<Intersect> intersect,
         pdf[i] = sinfo_vec[i]->prim->light_sampling_weight;
     }
     pmf.build(pdf);
-    auto idx = pmf.sample();
+    auto idx = pmf.sample(sampler);
     auto sinfo = sinfo_vec[idx];
     sinfo->pdf *= pmf.get_pdf(idx);
     return sinfo;
@@ -27,6 +28,7 @@ RenderUtils::light_sample(sptr<Intersect> intersect,
 vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
                                       sptr<Intersect> intersect,
                                       sptr<ObjectsBase> objects,
+                                      sptr<SamplerBase> sampler,
                                       int light_sample_num,
                                       int bsdf_sample_num) {
     vec3 direct_radiance(0, 0, 0);
@@ -49,11 +51,11 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
          ++light_sample) {
         std::vector<sptr<SampleInfo>> sinfo_vec(n);
         for (size_t i = 0; i < n; ++i) {
-            auto sinfo = lights[i]->light_sample(intersect, geos_pmf[i]);
+            auto sinfo = lights[i]->light_sample(intersect, sampler, geos_pmf[i]);
             sinfo_vec[i] = sinfo;
         }
         auto light_sinfo =
-            RenderUtils::light_sample(intersect, sinfo_vec, prims_pmf);
+            RenderUtils::light_sample(intersect, sinfo_vec, sampler, prims_pmf);
 
         vec3 x_prime = light_sinfo->pos;
         vec3 x = intersect->pos;
@@ -104,7 +106,7 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
         sptr<LocalInfo> linfo = std::make_shared<LocalInfo>(
             vec3(), wo, intersect->normal,
             intersect->prim->material->is_two_sided);
-        intersect->prim->material->sample(linfo);
+        intersect->prim->material->sample(linfo, sampler);
         real pdf_bsdf = intersect->prim->material->pdf(linfo);
         vec3 wi = linfo->to_world(linfo->wi);
 
@@ -113,8 +115,7 @@ vec3 RenderUtils::get_direct_radiance(std::vector<sptr<PrimitiveBase>> lights,
         bool is_intersect_light;
         auto intersect_light =
             objects->ray_intersect(light_test_ray, is_intersect_light);
-        real cos_theta_i =
-            std::max(linfo->normal_dot(linfo->wi), static_cast<real>(0.));
+        real cos_theta_i = std::max(linfo->normal_dot(linfo->wi), zero);
         if (is_intersect_light &&
             glm::length(intersect_light->prim->emit_radiance) > 0.0) {
             vec3 emit_radiance = intersect_light->prim->emit_radiance;

@@ -1,9 +1,8 @@
 #pragma once
 
-#include <functional>
-
 #include <harunobu/core/basic.h>
 #include <harunobu/core/common.h>
+#include <harunobu/sampler/sampler_base.h>
 
 HARUNOBU_NAMESPACE_BEGIN
 
@@ -63,9 +62,9 @@ public:
     virtual void do_transform(const mat4 &trans_mat) = 0;
     virtual sptr<Intersect> ray_intersect(const Ray &ray,
                                           bool &is_intersect) const = 0;
-    virtual sptr<SampleInfo> random_sample() const = 0;
+    virtual sptr<SampleInfo> random_sample(sptr<SamplerBase> sampler) const = 0;
     virtual real random_sample_pdf() const { return 1.0 / area; }
-    virtual sptr<SampleInfo> light_sample(sptr<Intersect> intersect) const;
+    virtual sptr<SampleInfo> light_sample(sptr<Intersect> intersect, sptr<SamplerBase> sampler) const;
     virtual real light_sample_pdf(const vec3 &x, const vec3 &x_light,
                                   const vec3 &n_light) const;
 

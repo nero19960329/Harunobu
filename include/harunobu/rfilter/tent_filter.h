@@ -12,8 +12,8 @@ public:
     }
 
     virtual real eval(real i, real j) const {
-        return std::max(static_cast<real>(0.), rx - std::abs(i)) *
-               std::max(static_cast<real>(0.), ry - std::abs(j));
+        return std::max(zero, rx - std::abs(i)) *
+               std::max(zero, ry - std::abs(j));
     }
 }; // class TentFilter
 
