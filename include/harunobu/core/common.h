@@ -14,12 +14,23 @@
 #include <glm/gtx/norm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include <omp.h>
+
 #include <cmath>
 #include <cstdlib>
 #include <memory>
 #include <random>
 
 namespace harunobu {
+
+// openmp
+#ifdef NDEBUG
+inline int get_max_threads() { return omp_get_max_threads(); }
+inline int get_thread_num() { return omp_get_thread_num(); }
+#else
+inline int get_max_threads() { return 1; }
+inline int get_thread_num() { return 0; }
+#endif
 
 // macros
 #define HARUNOBU_NAMESPACE_BEGIN namespace harunobu {

@@ -11,19 +11,17 @@ Film::Film(size_t width_, size_t height_) : width(width_), height(height_) {
 
 void Film::add_sample(const vec3 &rgb, real i, real j) {
     real rx = rfilter->rx, ry = rfilter->ry;
-    size_t x_min = std::ceil(i - rx), y_min = std::ceil(j - ry);
-    size_t x_max = std::ceil(i + rx), y_max = std::ceil(j + ry);
-    x_min = std::max(static_cast<size_t>(0), x_min);
-    y_min = std::max(static_cast<size_t>(0), y_min);
-    x_max = std::min(x_max, width);
-    y_max = std::min(y_max, height);
+    size_t x_min = std::max(0., std::ceil(i - rx));
+    size_t y_min = std::max(0., std::ceil(j - ry));
+    size_t x_max = std::min(width * 1., std::ceil(i + rx));
+    size_t y_max = std::min(height * 1., std::ceil(j + ry));
     for (size_t x = x_min; x < x_max; ++x) {
         for (size_t y = y_min; y < y_max; ++y) {
             real recon_weight = rfilter->eval(i - x, j - y);
             for (size_t k = 0; k < 3; ++k) {
-                image->at(k, j, i) += rgb[k] * recon_weight;
+                image->at(k, y, x) += rgb[k] * recon_weight;
             }
-            recon_weight_sum->at(0, j, i) += recon_weight;
+            recon_weight_sum->at(0, y, x) += recon_weight;
         }
     }
 }

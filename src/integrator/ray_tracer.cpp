@@ -2,7 +2,6 @@
 #include <harunobu/integrator/ray_tracer.h>
 
 #include <indicators/progress_bar.hpp>
-#include <omp.h>
 
 HARUNOBU_NAMESPACE_BEGIN
 
@@ -29,9 +28,8 @@ sptr<Image<real>> RayTracer::integrate() {
         option::FontStyles{std::vector<FontStyle>{FontStyle::bold}}};
     size_t pixel_num = raw_image->width * raw_image->height;
     real inv_sum = one * 100 / pixel_num;
-    size_t ray_idx = 0;
 
-    size_t thread_num = omp_get_max_threads();
+    size_t thread_num = get_max_threads();
     std::vector<sptr<SamplerBase>> samplers(thread_num);
     for (size_t i = 0; i < thread_num; ++i) {
         samplers[i] = sampler->copy();
@@ -39,7 +37,7 @@ sptr<Image<real>> RayTracer::integrate() {
 
 #pragma omp parallel for schedule(dynamic)
     for (size_t p = 0; p < pixel_num; ++p) {
-        int thread_id = omp_get_thread_num();
+        int thread_id = get_thread_num();
         sptr<SamplerBase> sampler_thread = samplers[thread_id];
 
         size_t i = p / raw_image->height, j = p % raw_image->height;
@@ -52,10 +50,11 @@ sptr<Image<real>> RayTracer::integrate() {
             { film->add_sample(rgb, ij[0], ij[1]); }
         }
         sampler_thread->next_pixel();
-#pragma omp critical
-        { ray_idx++; }
-        bar.set_progress(ray_idx * inv_sum);
+        if (p % (pixel_num / 100) == 0) {
+            bar.set_progress(p * inv_sum);
+        }
     }
+    bar.set_progress(100);
 
     return film->make_image();
 }
